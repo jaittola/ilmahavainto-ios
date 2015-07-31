@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="LoR-WX-q4P">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <scenes>
+        <!--Observation Data View Controller-->
+        <scene sceneID="3EM-T8-goU">
+            <objects>
+                <tableViewController id="LoR-WX-q4P" customClass="ObservationDataViewController" customModule="Ilmahavainto" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="AMn-Nb-r5p">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ObservationValueCell" id="Z44-4R-Cif" customClass="ObservationTableViewCell" customModule="Ilmahavainto" customModuleProvider="target">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Z44-4R-Cif" id="iVp-zZ-qtL">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Observation title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zg8-5t-XO2">
+                                            <rect key="frame" x="20" y="8" width="300" height="20.5"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="300" id="bJo-be-PaF"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C3M-eK-khc">
+                                            <rect key="frame" x="452" y="8" width="140" height="20.5"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="140" id="Ohg-Ck-3r7"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="C3M-eK-khc" firstAttribute="trailing" secondItem="iVp-zZ-qtL" secondAttribute="trailingMargin" id="2QO-6H-1Lg"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="C3M-eK-khc" secondAttribute="trailing" id="Bfx-fj-MlG"/>
+                                        <constraint firstItem="Zg8-5t-XO2" firstAttribute="top" secondItem="iVp-zZ-qtL" secondAttribute="topMargin" id="Q2A-tz-vsI"/>
+                                        <constraint firstItem="C3M-eK-khc" firstAttribute="top" secondItem="iVp-zZ-qtL" secondAttribute="topMargin" id="Sa5-Wj-BHt"/>
+                                        <constraint firstItem="Zg8-5t-XO2" firstAttribute="leading" secondItem="iVp-zZ-qtL" secondAttribute="leadingMargin" constant="12" id="f1i-ra-nph"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="title" destination="Zg8-5t-XO2" id="Tmj-S3-dx4"/>
+                                    <outlet property="value" destination="C3M-eK-khc" id="QGU-xv-za1"/>
+                                </connections>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="LoR-WX-q4P" id="XkD-9X-chZ"/>
+                            <outlet property="delegate" destination="LoR-WX-q4P" id="xmL-aN-oem"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7vm-3s-eQE" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="391" y="443"/>
+        </scene>
+    </scenes>
+</document>
