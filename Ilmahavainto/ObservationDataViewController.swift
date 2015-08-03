@@ -34,7 +34,8 @@ class ObservationDataViewController: UITableViewController {
         task.resume()
     }
     
-    func handleObservationDataResponse(data: NSData!, response: NSURLResponse!, error: NSError!) {            var jsonError: NSError? = nil
+    func handleObservationDataResponse(data: NSData!, response: NSURLResponse!, error: NSError!) {
+        var jsonError: NSError? = nil
         var rawj: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(0), error: &jsonError)
         if let je = jsonError {
             showAlert("Bad JSON data received: \(jsonError!.localizedDescription)")

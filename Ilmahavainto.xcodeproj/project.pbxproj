@@ -15,6 +15,8 @@
 		4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */; };
 		4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */; };
 		4F2F11761B6BD7AC001F31D4 /* ObservationMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */; };
+		4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F96494F1B6F404F005B6D7A /* MapViewController.swift */; };
+		4F9649521B6F413D005B6D7A /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F9649511B6F413D005B6D7A /* MapKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,8 @@
 		4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationDataViewController.swift; sourceTree = "<group>"; };
 		4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationTableViewCell.swift; sourceTree = "<group>"; };
 		4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationMapping.swift; sourceTree = "<group>"; };
+		4F96494F1B6F404F005B6D7A /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		4F9649511B6F413D005B6D7A /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F9649521B6F413D005B6D7A /* MapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +68,7 @@
 		4F1AC1CE1B6B63B200A46721 = {
 			isa = PBXGroup;
 			children = (
+				4F9649511B6F413D005B6D7A /* MapKit.framework */,
 				4F1AC1D91B6B63B200A46721 /* Ilmahavainto */,
 				4F1AC1EF1B6B63B200A46721 /* IlmahavaintoTests */,
 				4F1AC1D81B6B63B200A46721 /* Products */,
@@ -81,9 +87,10 @@
 		4F1AC1D91B6B63B200A46721 /* Ilmahavainto */ = {
 			isa = PBXGroup;
 			children = (
-				4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */,
-				4F1AC1DC1B6B63B200A46721 /* AppDelegate.swift */,
 				4F1AC1E01B6B63B200A46721 /* Main.storyboard */,
+				4F1AC1DC1B6B63B200A46721 /* AppDelegate.swift */,
+				4F96494F1B6F404F005B6D7A /* MapViewController.swift */,
+				4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */,
 				4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */,
 				4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */,
 				4F1AC1E31B6B63B200A46721 /* Images.xcassets */,
@@ -221,6 +228,7 @@
 				4F1AC1DD1B6B63B200A46721 /* AppDelegate.swift in Sources */,
 				4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */,
 				4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */,
+				4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */,
 				4F2F11761B6BD7AC001F31D4 /* ObservationMapping.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
