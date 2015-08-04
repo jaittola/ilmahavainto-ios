@@ -32,9 +32,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-        var pinAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("PinView") as? MKPinAnnotationView
+        var pinAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("AnnotationView") as? MKPinAnnotationView
         if (pinAnnotationView == nil) {
             pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "PinView")
+            pinAnnotationView!.canShowCallout = true
         }
         else {
             pinAnnotationView!.annotation = annotation
@@ -84,25 +85,33 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         })
     }
     
+    struct Coordinates {
+        init(coordinates: CLLocationCoordinate2D, displayString: String) {
+            self.coordinates = coordinates
+            self.displayString = displayString
+        }
+        
+        let coordinates: CLLocationCoordinate2D
+        let displayString: String
+    }
+    
     
     func displayObservations() {
-        for a in mapView.annotations {
-            mapView.removeAnnotation(a as? MKAnnotation)
-        }
-
+        mapView.removeAnnotations(mapView.annotations)
         if let observationDict = observations {
             for (k, observationArr) in observationDict {
                 if let coordinate = makeCoordinate(observationArr[0]) {
                     let annotation = MKPointAnnotation()
-                    annotation.coordinate = coordinate
-                    annotation.title = "Observation \(k)"
+                    annotation.coordinate = coordinate.coordinates
+                    annotation.title = makeObservationText(observationArr[0])
+                    annotation.subtitle = coordinate.displayString
                     mapView.addAnnotation(annotation)
                 }
             }
         }
     }
     
-    func makeCoordinate(observation: [String: String]) -> CLLocationCoordinate2D? {
+    func makeCoordinate(observation: [String: String]) -> Coordinates? {
         var lat = observation["lat"]
         var lon = observation["long"]
         
@@ -110,7 +119,39 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             return nil
         }
         
-        return CLLocationCoordinate2D(latitude: NSString(string: lat!).doubleValue, longitude: NSString(string: lon!).doubleValue)
+        let latText = makeSexagesimal(NSString(string: lat!).doubleValue, isLatitude: true)
+        let lonText = makeSexagesimal(NSString(string: lon!).doubleValue, isLatitude: false)
+        
+        return Coordinates(coordinates: CLLocationCoordinate2D(latitude: NSString(string: lat!).doubleValue, longitude: NSString(string: lon!).doubleValue),
+            displayString: "\(latText) \(lonText)")
+    }
+    
+    func makeSexagesimal(decimalDegree: Double, isLatitude: Bool) -> String {
+        let degrees: Int = Int(decimalDegree)
+        let fraction = decimalDegree - Double(degrees)
+        let hemisphere = isLatitude ?
+            (decimalDegree >= 0 ? "N" : "S") :
+            (decimalDegree >= 0 ? "E" : "W")
+        
+        return String(format: "%@ %d° %.3f'", hemisphere, degrees, fraction)
+    }
+    
+    func makeObservationText(observation: [String: String]) -> String {
+        let airTemperature = observationValue(observation["airTemperature"], unit: "°C ")
+        let avgWindSpeed = observationValue(observation["windSpeed"], unit: " m/s ")
+        let gws = observationValue(observation["windSpeedGust"], unit: " m/s")
+        let gustWindSpeed = gws != "" ? "(\(gws)) " : ""
+        let windDirection = observationValue(observation["windDirection"], unit: "° ")
+        let windText = avgWindSpeed != "" || gustWindSpeed != "" || windDirection != "" ? "Wind: " : ""
+        
+        return "\(airTemperature)\(windText)\(avgWindSpeed)\(gustWindSpeed)\(windDirection)"
+    }
+    
+    func observationValue(value: String?, unit: String = "") -> String {
+        if value == nil || value! == "NaN" {
+            return ""
+        }
+        return String(format: "%@%@", value!, unit)
     }
     
     func showAlert(message: String) {
