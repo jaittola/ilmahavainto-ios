@@ -100,11 +100,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.removeAnnotations(mapView.annotations)
         if let observationDict = observations {
             for (k, observationArr) in observationDict {
-                if let coordinate = makeCoordinate(observationArr[0]) {
+                let firstObservation = observationArr[0]
+                if let coordinate = makeCoordinate(firstObservation) {
                     let annotation = MKPointAnnotation()
+                    let stationName = firstObservation["stationName"] ?? ""
                     annotation.coordinate = coordinate.coordinates
-                    annotation.title = makeObservationText(observationArr[0])
-                    annotation.subtitle = coordinate.displayString
+                    annotation.title = makeObservationText(firstObservation)
+                    annotation.subtitle = "\(stationName) (\(coordinate.displayString))"
                     mapView.addAnnotation(annotation)
                 }
             }
@@ -144,7 +146,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let windDirection = observationValue(observation["windDirection"], unit: "° ")
         let windText = avgWindSpeed != "" || gustWindSpeed != "" || windDirection != "" ? "Wind: " : ""
         
-        return "\(airTemperature)\(windText)\(avgWindSpeed)\(gustWindSpeed)\(windDirection)"
+        let result = "\(airTemperature)\(windText)\(avgWindSpeed)\(gustWindSpeed)\(windDirection)"
+        return result != "" ? result : "(No temperature & wind data)"
     }
     
     func observationValue(value: String?, unit: String = "") -> String {
