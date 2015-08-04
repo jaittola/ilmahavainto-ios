@@ -48,14 +48,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
-        println("Annotation view tapped")
-        let annotation = view.annotation as! ExtendedAnnotation
-        println("Location key \(annotation.locationId!)")
-   //     performSegueWithIdentifier("ObservationDetailSegue", sender: annotation)
+        performSegueWithIdentifier("ShowObservationStation", sender: view)
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        println("prepareforsegue \(sender)")
+        if segue.identifier == "ShowObservationStation" {
+            let annotation = (sender! as! MKAnnotationView).annotation as! ExtendedAnnotation
+            if let observationVC = segue.destinationViewController as? ObservationDataViewController {
+                observationVC.observationStationData = observations![annotation.locationId!]
+            }
+        }
     }
 
     func loadObservations(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
@@ -136,32 +138,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             return nil
         }
         
-        let latText = makeSexagesimal(NSString(string: lat!).doubleValue, isLatitude: true)
-        let lonText = makeSexagesimal(NSString(string: lon!).doubleValue, isLatitude: false)
-        
         return Coordinates(coordinates: CLLocationCoordinate2D(latitude: NSString(string: lat!).doubleValue, longitude: NSString(string: lon!).doubleValue),
-            displayString: "\(latText) \(lonText)")
+            displayString: ObservationUtils.makeCoordinateString(lat: lat!, lon: lon!))
     }
     
-    func makeSexagesimal(decimalDegree: Double, isLatitude: Bool) -> String {
-        let degrees: Int = Int(decimalDegree)
-        let fraction = decimalDegree - Double(degrees)
-        let hemisphere = isLatitude ?
-            (decimalDegree >= 0 ? "N" : "S") :
-            (decimalDegree >= 0 ? "E" : "W")
-        
-        return String(format: "%@ %d° %.3f'", hemisphere, degrees, fraction)
-    }
     
     func makeObservationText(observation: [String: String]) -> String {
         let airTemperature = observationValue(observation["airTemperature"], unit: "°C ")
         let avgWindSpeed = observationValue(observation["windSpeed"], unit: " m/s ")
         let gws = observationValue(observation["windSpeedGust"], unit: " m/s")
         let gustWindSpeed = gws != "" ? "(\(gws)) " : ""
-        let windDirection = observationValue(observation["windDirection"], unit: "° ")
-        let windText = avgWindSpeed != "" || gustWindSpeed != "" || windDirection != "" ? "Wind: " : ""
-        
-        let result = "\(airTemperature)\(windText)\(avgWindSpeed)\(gustWindSpeed)\(windDirection)"
+        let wd = ObservationUtils.windDirection(observation["windDirection"])
+        let windDirection = wd != "" ? wd + " " : ""
+        let result = "\(airTemperature)\(windDirection)\(avgWindSpeed)\(gustWindSpeed)"
         return result != "" ? result : "(No temperature & wind data)"
     }
     

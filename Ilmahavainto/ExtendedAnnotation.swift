@@ -7,7 +7,8 @@
 //
 
 import UIKit
+import MapKit
 
 class ExtendedAnnotation: MKPointAnnotation {
-   
+    var locationId: String?
 }

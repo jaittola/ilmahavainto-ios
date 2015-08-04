@@ -90,6 +90,7 @@
                     <navigationItem key="navigationItem" title="Observations on map" id="4LD-vX-stG"/>
                     <connections>
                         <outlet property="mapView" destination="0D7-h8-Dhc" id="ffT-kD-nhh"/>
+                        <segue destination="LoR-WX-q4P" kind="show" identifier="ShowObservationStation" id="GaB-5b-Lvm"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="979-LD-t9o" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -106,7 +107,6 @@
                     </navigationBar>
                     <connections>
                         <segue destination="vlX-qj-muO" kind="relationship" relationship="rootViewController" id="xcm-Iw-ET2"/>
-                        <segue destination="LoR-WX-q4P" kind="show" identifier="ObservationDetailSegue" id="a2N-jJ-mLG"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u6w-GS-tfL" userLabel="First Responder" sceneMemberID="firstResponder"/>

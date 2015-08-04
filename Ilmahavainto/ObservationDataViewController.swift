@@ -30,6 +30,7 @@ class ObservationDataViewController: UITableViewController {
                 }
             }
         }
+        stationName = observations["stationName"] ?? ""
         updateObservationCoordinates(observations["lat"]!, longitude: observations["long"]!)
         updateObservationTimestap(observations["time"])
         dispatch_async(dispatch_get_main_queue(), {
@@ -42,7 +43,7 @@ class ObservationDataViewController: UITableViewController {
             coordString = ""
         }
         else {
-            coordString = "Observations at N \(latitude), E \(longitude)"
+            coordString = ObservationUtils.makeCoordinateString(lat: latitude, lon: longitude)
         }
     }
     
@@ -62,7 +63,8 @@ class ObservationDataViewController: UITableViewController {
             return ""
         }
         else {
-            return coordString + " at " + observationTimestamp
+            return (stationName != "" ? "\(stationName) (\(coordString))" : coordString) +
+                " at " + observationTimestamp
         }
     }
     
@@ -85,6 +87,15 @@ class ObservationDataViewController: UITableViewController {
         return (NSString(format: "%.0f", round((value as NSString).floatValue)) as String)
     }
 
+    var observationStationData: [Dictionary<String, String>]? {
+        didSet {
+            if let sd = observationStationData {
+                updateObservations(sd[0])
+            }
+        }
+    }
+    
+    var stationName = ""
     var coordString = ""
     var observationTimestamp = ""
     var displayArray: [ (String, String) ] = []
@@ -93,7 +104,7 @@ class ObservationDataViewController: UITableViewController {
             formatter: { (value: String) -> String in value + "°C" }),
         ObservationMapping(title: "Wind Direction", parameter: "windDirection",
             formatter: { (value: String) -> String in
-                ObservationDataViewController.stripDecimals(value) + "°"
+                ObservationUtils.windDirection(value)
             }),
         ObservationMapping(title: "Average wind speed", parameter: "windSpeed",
             formatter: { (value: String) -> String in value + " m/s"}),
