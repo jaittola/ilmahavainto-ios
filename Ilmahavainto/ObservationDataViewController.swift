@@ -13,43 +13,11 @@ class ObservationDataViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        loadObservations()
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
-    
-    func loadObservations() {
-        let task = urlSession.dataTaskWithURL(NSURL(string: "https://ilmahavainto.herokuapp.com/1/observations?lat1=59.5&lat2=60.5&lon1=24.8&lon2=25.5")!,
-            completionHandler: { (data: NSData!, response: NSURLResponse!, error: NSError!) -> Void in
-                if error != nil {
-                    self.showAlert(error.localizedDescription)
-                }
-                else if let dataValue = data {
-                    self.handleObservationDataResponse(dataValue, response: response, error: error)
-                }
-        })
-        task.resume()
-    }
-    
-    func handleObservationDataResponse(data: NSData!, response: NSURLResponse!, error: NSError!) {
-        var jsonError: NSError? = nil
-        var rawj: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(0), error: &jsonError)
-        if let je = jsonError {
-            showAlert("Bad JSON data received: \(jsonError!.localizedDescription)")
-            return
-        }
-        if let obsStations = rawj as? [ String:[ Dictionary<String, String> ] ] {
-            let interestingObservations = obsStations["60.20307,24.96130"]?.last
-            if let obs = interestingObservations {
-                self.updateObservations(obs)
-            }
-            else {
-                updateObservations([String:String]())
-            }
-        }
     }
     
     func updateObservations(observations: [String: String]) {
@@ -69,16 +37,6 @@ class ObservationDataViewController: UITableViewController {
         })
     }
 
-    func showAlert(message: String) {
-        dispatch_async(dispatch_get_main_queue(), {
-            var alertVC = UIAlertController(title: "Error loading data",
-                message: message,
-                preferredStyle: UIAlertControllerStyle.Alert)
-            alertVC.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Cancel, handler: nil))
-            self.presentViewController(alertVC, animated: true, completion: nil)
-        })
-    }
-    
     func updateObservationCoordinates(latitude: String, longitude: String) {
         if latitude == "nil" || longitude == "nil" {
             coordString = ""
@@ -127,7 +85,6 @@ class ObservationDataViewController: UITableViewController {
         return (NSString(format: "%.0f", round((value as NSString).floatValue)) as String)
     }
 
-    let urlSession = NSURLSession.sharedSession()
     var coordString = ""
     var observationTimestamp = ""
     var displayArray: [ (String, String) ] = []

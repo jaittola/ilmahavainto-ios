@@ -36,12 +36,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if (pinAnnotationView == nil) {
             pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "PinView")
             pinAnnotationView!.canShowCallout = true
+            var rightButton = UIButton.buttonWithType(UIButtonType.DetailDisclosure) as! UIButton
+            rightButton.addTarget(nil, action: nil, forControlEvents: UIControlEvents.TouchUpInside);
+            pinAnnotationView!.rightCalloutAccessoryView = rightButton
         }
         else {
             pinAnnotationView!.annotation = annotation
         }
         
         return pinAnnotationView
+    }
+    
+    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
+        println("Annotation view tapped")
+        let annotation = view.annotation as! ExtendedAnnotation
+        println("Location key \(annotation.locationId!)")
+   //     performSegueWithIdentifier("ObservationDetailSegue", sender: annotation)
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        println("prepareforsegue \(sender)")
     }
 
     func loadObservations(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
@@ -99,14 +113,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func displayObservations() {
         mapView.removeAnnotations(mapView.annotations)
         if let observationDict = observations {
-            for (k, observationArr) in observationDict {
+            for (locationKey, observationArr) in observationDict {
                 let firstObservation = observationArr[0]
                 if let coordinate = makeCoordinate(firstObservation) {
-                    let annotation = MKPointAnnotation()
+                    let annotation = ExtendedAnnotation()
                     let stationName = firstObservation["stationName"] ?? ""
                     annotation.coordinate = coordinate.coordinates
                     annotation.title = makeObservationText(firstObservation)
                     annotation.subtitle = "\(stationName) (\(coordinate.displayString))"
+                    annotation.locationId = locationKey
                     mapView.addAnnotation(annotation)
                 }
             }

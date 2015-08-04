@@ -5,7 +5,7 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--Observation Data View Controller-->
+        <!--Observations-->
         <scene sceneID="3EM-T8-goU">
             <objects>
                 <tableViewController id="LoR-WX-q4P" customClass="ObservationDataViewController" customModule="Ilmahavainto" customModuleProvider="target" sceneMemberID="viewController">
@@ -57,13 +57,13 @@
                             <outlet property="delegate" destination="LoR-WX-q4P" id="xmL-aN-oem"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="uwM-hh-hRD"/>
+                    <navigationItem key="navigationItem" title="Observations" id="B2X-o5-YcL"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7vm-3s-eQE" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="891" y="931"/>
         </scene>
-        <!--Map View Controller-->
+        <!--Observations on map-->
         <scene sceneID="zGF-7t-PMJ">
             <objects>
                 <viewController id="vlX-qj-muO" customClass="MapViewController" customModule="Ilmahavainto" customModuleProvider="target" sceneMemberID="viewController">
@@ -87,7 +87,7 @@
                             <constraint firstItem="0D7-h8-Dhc" firstAttribute="top" secondItem="AHz-jm-5e1" secondAttribute="top" id="zRN-Z3-6d6"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="4LD-vX-stG"/>
+                    <navigationItem key="navigationItem" title="Observations on map" id="4LD-vX-stG"/>
                     <connections>
                         <outlet property="mapView" destination="0D7-h8-Dhc" id="ffT-kD-nhh"/>
                     </connections>
@@ -106,6 +106,7 @@
                     </navigationBar>
                     <connections>
                         <segue destination="vlX-qj-muO" kind="relationship" relationship="rootViewController" id="xcm-Iw-ET2"/>
+                        <segue destination="LoR-WX-q4P" kind="show" identifier="ObservationDetailSegue" id="a2N-jJ-mLG"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u6w-GS-tfL" userLabel="First Responder" sceneMemberID="firstResponder"/>
