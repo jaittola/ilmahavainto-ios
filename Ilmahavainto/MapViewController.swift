@@ -31,6 +31,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         isFirst = false
     }
     
+    @IBAction func handleAboutButtonPressed(sender: AnyObject) {
+        var aboutVC = UIAlertController(title: "About this application",
+                message: "Copyright (c) 2015 jaittola@iki.fi\nWeather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence",
+                preferredStyle: UIAlertControllerStyle.ActionSheet)
+        aboutVC.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
+        self.presentViewController(aboutVC, animated: true, completion: nil)
+    }
+    
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         var pinAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("AnnotationView") as? MKPinAnnotationView
         if (pinAnnotationView == nil) {

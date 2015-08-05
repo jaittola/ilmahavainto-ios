@@ -61,9 +61,9 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7vm-3s-eQE" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="891" y="931"/>
+            <point key="canvasLocation" x="900" y="937"/>
         </scene>
-        <!--Observations on map-->
+        <!--Map View Controller-->
         <scene sceneID="zGF-7t-PMJ">
             <objects>
                 <viewController id="vlX-qj-muO" customClass="MapViewController" customModule="Ilmahavainto" customModuleProvider="target" sceneMemberID="viewController">
@@ -87,7 +87,13 @@
                             <constraint firstItem="0D7-h8-Dhc" firstAttribute="top" secondItem="AHz-jm-5e1" secondAttribute="top" id="zRN-Z3-6d6"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Observations on map" id="4LD-vX-stG"/>
+                    <navigationItem key="navigationItem" id="4LD-vX-stG">
+                        <barButtonItem key="rightBarButtonItem" title="About" id="b5m-4T-Eck">
+                            <connections>
+                                <action selector="handleAboutButtonPressed:" destination="vlX-qj-muO" id="xFO-xJ-qdr"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="0D7-h8-Dhc" id="ffT-kD-nhh"/>
                         <segue destination="LoR-WX-q4P" kind="show" identifier="ShowObservationStation" id="GaB-5b-Lvm"/>
