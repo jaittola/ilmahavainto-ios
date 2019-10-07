@@ -19,14 +19,14 @@ class ObservationUtils: NSObject {
         return String(format: "%@ %d° %.3f'", hemisphere, degrees, fraction)
     }
     
-    class func makeCoordinateString(#lat: String, lon: String) -> String {
-        let latText = makeSexagesimal(NSString(string: lat).doubleValue, isLatitude: true)
-        let lonText = makeSexagesimal(NSString(string: lon).doubleValue, isLatitude: false)
+    class func makeCoordinateString(lat: String, lon: String) -> String {
+        let latText = makeSexagesimal(decimalDegree: NSString(string: lat).doubleValue, isLatitude: true)
+        let lonText = makeSexagesimal(decimalDegree: NSString(string: lon).doubleValue, isLatitude: false)
 
         return "\(latText) \(lonText)"
     }
 
-    class func windDirection(wind: String?) -> String {
+    class func windDirection(_ wind: String?) -> String {
         let windDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "W"]
         if let wd = wind {
             let roundedWind = round(NSString(string: wd).doubleValue)

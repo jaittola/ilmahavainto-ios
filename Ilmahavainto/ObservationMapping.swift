@@ -11,9 +11,9 @@ import UIKit
 class ObservationMapping: NSObject {
     var title: String
     var parameter: String
-    var format: (value: String) -> String
+    var format: (String) -> String
     
-    init(title: String, parameter: String, formatter: (value: String) -> String) {
+    init(title: String, parameter: String, formatter: @escaping (String) -> String) {
         self.title = title
         self.parameter = parameter
         self.format = formatter

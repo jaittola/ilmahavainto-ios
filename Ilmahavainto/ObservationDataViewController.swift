@@ -20,22 +20,22 @@ class ObservationDataViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func updateObservations(observations: [String: String]) {
-        displayArray.removeAll(keepCapacity: true)
+    func updateObservations(_ observations: [String: String]) {
+        displayArray.removeAll(keepingCapacity: true)
         for m in observationMappings {
             if let observation = observations[m.parameter] {
                 if (observation != "NaN") {
                     let t = m.title  // ??
-                    displayArray.append((t, m.format(value: observation)))
+                    displayArray.append((t, m.format(observation)))
                 }
             }
         }
         stationName = observations["stationName"] ?? ""
-        updateObservationCoordinates(observations["lat"]!, longitude: observations["long"]!)
+        updateObservationCoordinates(latitude: observations["lat"]!, longitude: observations["long"]!)
         updateObservationTimestap(observations["time"])
-        dispatch_async(dispatch_get_main_queue(), {
+        DispatchQueue.main.async {
             self.tableView.reloadData()
-        })
+        }
     }
 
     func updateObservationCoordinates(latitude: String, longitude: String) {
@@ -47,18 +47,19 @@ class ObservationDataViewController: UITableViewController {
         }
     }
     
-    func updateObservationTimestap(timestamp: String?) {
+    func updateObservationTimestap(_ timestamp: String?) {
         if let ts = timestamp {
-            let date = NSDate(timeIntervalSince1970: NSString(string: ts).doubleValue)
-            observationTimestamp = NSDateFormatter.localizedStringFromDate(date,
-                dateStyle: NSDateFormatterStyle.ShortStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
+            let date = Date(timeIntervalSince1970: NSString(string: ts).doubleValue)
+            observationTimestamp = DateFormatter.localizedString(from: date,
+                                                                 dateStyle: DateFormatter.Style.short,
+                                                                 timeStyle: DateFormatter.Style.short)
         }
         else {
             observationTimestamp = ""
         }
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if coordString.isEmpty || observationTimestamp.isEmpty {
             return ""
         }
@@ -68,22 +69,22 @@ class ObservationDataViewController: UITableViewController {
         }
     }
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in: UITableView) -> Int {
         return displayArray.isEmpty ? 0 : 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayArray.count
     }
     
-    override func tableView(_tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = _tableView.dequeueReusableCellWithIdentifier("ObservationValueCell") as! ObservationTableViewCell
-        cell.title.text = displayArray[indexPath.row].0
-        cell.value.text = displayArray[indexPath.row].1
+    override func tableView(_ tableView: UITableView, cellForRowAt: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ObservationValueCell") as! ObservationTableViewCell
+        cell.title.text = displayArray[cellForRowAt.row].0
+        cell.value.text = displayArray[cellForRowAt.row].1
         return cell
     }
     
-    class func stripDecimals(value: String) -> String {
+    class func stripDecimals(_ value: String) -> String {
         return (NSString(format: "%.0f", round((value as NSString).floatValue)) as String)
     }
 
