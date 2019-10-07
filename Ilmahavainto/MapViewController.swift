@@ -74,7 +74,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let lon1 = roundTo3(center.longitude - viewSpan.longitudeDelta / 2)
         let lon2 = roundTo3(center.longitude + viewSpan.longitudeDelta / 2)
         println("=> Loading observations after map region change; approx pos range \(lat1) \(lon1) ,  \(lat2), \(lon2)")
-        let task = urlSession.dataTaskWithURL(NSURL(string: "https://ilmahavainto.herokuapp.com/1/observations?lat1=\(lat1)&lat2=\(lat2)&lon1=\(lon1)&lon2=\(lon2)")!,
+        let task = urlSession.dataTaskWithURL(NSURL(string: "https://ilmaproxy.herokuapp.com/1/observations?lat1=\(lat1)&lat2=\(lat2)&lon1=\(lon1)&lon2=\(lon2)")!,
             completionHandler: { (data: NSData!, response: NSURLResponse!, error: NSError!) -> Void in
                 if error != nil {
                     self.showAlert(error.localizedDescription)
