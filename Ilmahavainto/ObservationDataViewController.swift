@@ -24,39 +24,23 @@ class ObservationDataViewController: UITableViewController {
         displayArray.removeAll(keepingCapacity: true)
         for m in observationMappings {
             if let observation = observations[m.parameter] {
-                if (observation != "NaN") {
-                    let t = m.title  // ??
-                    displayArray.append((t, m.format(observation)))
-                }
+                    displayArray.append((m.title, m.format(observation)))
             }
         }
         stationName = observations["stationName"] ?? ""
-        updateObservationCoordinates(latitude: observations["lat"]!, longitude: observations["long"]!)
-        updateObservationTimestap(observations["time"])
+        coordString = ObservationUtils.makeCoordinateString(lat: observations["lat"], lon: observations["long"])
+        observationTimestamp = observationTimestamp(observations["time"])
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
 
-    func updateObservationCoordinates(latitude: String, longitude: String) {
-        if latitude == "nil" || longitude == "nil" {
-            coordString = ""
-        }
-        else {
-            coordString = ObservationUtils.makeCoordinateString(lat: latitude, lon: longitude)
-        }
-    }
-    
-    func updateObservationTimestap(_ timestamp: String?) {
-        if let ts = timestamp {
-            let date = Date(timeIntervalSince1970: NSString(string: ts).doubleValue)
-            observationTimestamp = DateFormatter.localizedString(from: date,
-                                                                 dateStyle: DateFormatter.Style.short,
-                                                                 timeStyle: DateFormatter.Style.short)
-        }
-        else {
-            observationTimestamp = ""
-        }
+    private func observationTimestamp(_ timestamp: String?) -> String {
+        guard let ts = timestamp else { return "" }
+        let date = Date(timeIntervalSince1970: NSString(string: ts).doubleValue)
+        return DateFormatter.localizedString(from: date,
+                                             dateStyle: DateFormatter.Style.short,
+                                             timeStyle: DateFormatter.Style.short)
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -90,8 +74,8 @@ class ObservationDataViewController: UITableViewController {
 
     var observationStationData: [Dictionary<String, String>]? {
         didSet {
-            if let sd = observationStationData {
-                updateObservations(sd[0])
+            if let sd = observationStationData?.last {
+                updateObservations(sd)
             }
         }
     }

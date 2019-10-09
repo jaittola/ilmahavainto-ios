@@ -19,9 +19,12 @@ class ObservationUtils: NSObject {
         return String(format: "%@ %d° %.3f'", hemisphere, degrees, fraction)
     }
     
-    class func makeCoordinateString(lat: String, lon: String) -> String {
-        let latText = makeSexagesimal(decimalDegree: NSString(string: lat).doubleValue, isLatitude: true)
-        let lonText = makeSexagesimal(decimalDegree: NSString(string: lon).doubleValue, isLatitude: false)
+    class func makeCoordinateString(lat: String?, lon: String?) -> String {
+        guard let lat2 = lat else { return "" }
+        guard let lon2 = lon else { return "" }
+
+        let latText = makeSexagesimal(decimalDegree: NSString(string: lat2).doubleValue, isLatitude: true)
+        let lonText = makeSexagesimal(decimalDegree: NSString(string: lon2).doubleValue, isLatitude: false)
 
         return "\(latText) \(lonText)"
     }

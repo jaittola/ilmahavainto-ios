@@ -15,7 +15,7 @@
 		4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */; };
 		4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */; };
 		4F2F11761B6BD7AC001F31D4 /* ObservationMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */; };
-		4F61A6511B70DFAA000434C5 /* ExtendedAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F61A6501B70DFAA000434C5 /* ExtendedAnnotation.swift */; };
+		4F39C074234E02B30087887A /* ObservationAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F39C073234E02B30087887A /* ObservationAnnotation.swift */; };
 		4F61A6531B70E85D000434C5 /* ObservationUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F61A6521B70E85D000434C5 /* ObservationUtils.swift */; };
 		4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F96494F1B6F404F005B6D7A /* MapViewController.swift */; };
 		4F9649521B6F413D005B6D7A /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F9649511B6F413D005B6D7A /* MapKit.framework */; };
@@ -44,7 +44,7 @@
 		4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationDataViewController.swift; sourceTree = "<group>"; };
 		4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationTableViewCell.swift; sourceTree = "<group>"; };
 		4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationMapping.swift; sourceTree = "<group>"; };
-		4F61A6501B70DFAA000434C5 /* ExtendedAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtendedAnnotation.swift; sourceTree = "<group>"; };
+		4F39C073234E02B30087887A /* ObservationAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationAnnotation.swift; sourceTree = "<group>"; };
 		4F61A6521B70E85D000434C5 /* ObservationUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationUtils.swift; sourceTree = "<group>"; };
 		4F96494F1B6F404F005B6D7A /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		4F9649511B6F413D005B6D7A /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -94,7 +94,6 @@
 				4F1AC1E01B6B63B200A46721 /* Main.storyboard */,
 				4F1AC1DC1B6B63B200A46721 /* AppDelegate.swift */,
 				4F96494F1B6F404F005B6D7A /* MapViewController.swift */,
-				4F61A6501B70DFAA000434C5 /* ExtendedAnnotation.swift */,
 				4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */,
 				4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */,
 				4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */,
@@ -102,6 +101,7 @@
 				4F1AC1E31B6B63B200A46721 /* Images.xcassets */,
 				4F1AC1E51B6B63B200A46721 /* LaunchScreen.xib */,
 				4F1AC1DA1B6B63B200A46721 /* Supporting Files */,
+				4F39C073234E02B30087887A /* ObservationAnnotation.swift */,
 			);
 			path = Ilmahavainto;
 			sourceTree = "<group>";
@@ -231,8 +231,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F39C074234E02B30087887A /* ObservationAnnotation.swift in Sources */,
 				4F1AC1DD1B6B63B200A46721 /* AppDelegate.swift in Sources */,
-				4F61A6511B70DFAA000434C5 /* ExtendedAnnotation.swift in Sources */,
 				4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */,
 				4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */,
 				4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */,
