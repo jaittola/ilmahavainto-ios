@@ -24,7 +24,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let viewSpan = mapView.region.span
         let center = mapView.region.center
-        loadObservations(center: center, viewSpan: viewSpan)
+        if !animated {
+            loadObservations(center: center, viewSpan: viewSpan)
+        }
     }
     
     @IBAction func handleAboutButtonPress(_ sender: UIButton) {
@@ -36,18 +38,65 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, viewFor: MKAnnotation) -> MKAnnotationView? {
-        if let pinAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "PinView") as? MKPinAnnotationView {
-            pinAnnotationView.annotation = viewFor
+        guard let observationAnnotation = viewFor as? ObservationAnnotation else { return nil }
+        if observationAnnotation.windSpeed >= minWindSpeed {
+            return createWindBarbAnnotation(observationAnnotation)
+        } else {
+            return createPinAnnotation(observationAnnotation)
+        }
+    }
+
+    private func createWindBarbAnnotation(_ observationAnnotation: ObservationAnnotation) -> MKAnnotationView {
+        func createOrReuseBarbAnnotationView(_ observationAnnotation: ObservationAnnotation) -> MKAnnotationView {
+            let reuseIdentifier = "BarbView"
+            if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) {
+                annotationView.annotation = observationAnnotation
+                return annotationView
+            } else {
+                return MKAnnotationView(annotation: observationAnnotation, reuseIdentifier: reuseIdentifier)
+            }
+        }
+
+        let annotationView = createOrReuseBarbAnnotationView(observationAnnotation)
+        annotationView.canShowCallout = true
+        let rightButton = UIButton(type: UIButton.ButtonType.detailDisclosure)
+        annotationView.rightCalloutAccessoryView = rightButton
+        annotationView.image = createWindBarbImage(observationAnnotation)
+        return annotationView
+    }
+
+    private func createPinAnnotation(_ observationAnnotation: ObservationAnnotation) -> MKAnnotationView {
+        let reuseIdentifier = "PinView"
+        if let pinAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? MKPinAnnotationView {
+            pinAnnotationView.annotation = observationAnnotation
             return pinAnnotationView
         }
 
-        let av = MKPinAnnotationView(annotation: viewFor, reuseIdentifier: "PinView")
+        let av = MKPinAnnotationView(annotation: observationAnnotation, reuseIdentifier: reuseIdentifier)
         av.canShowCallout = true
         let rightButton = UIButton(type: UIButton.ButtonType.detailDisclosure)
         av.rightCalloutAccessoryView = rightButton
         return av
     }
     
+    private func createWindBarbImage(_ annotation: ObservationAnnotation) -> UIImage? {
+        func barbImage(windSpeed: Double) -> String {
+            let idx = Int((windSpeed / 2.5).rounded())
+            switch (idx) {
+            case ..<0:
+                return "wind_speed_00"
+            case 0:
+                return "wind_speed_01"
+            case 1...12:
+                return String(format: "wind_speed_%02d", idx)
+            default:
+                return "wind_speed_12"
+            }
+        }
+
+        return UIImage(named: barbImage(windSpeed: annotation.windSpeed))?.rotate(degrees: annotation.windDirection - 90.0)  // The barb images point to east
+    }
+
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         performSegue(withIdentifier: "ShowObservationStation", sender: view)
     }
@@ -124,8 +173,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     title: makeObservationText(observation),
                     subtitle: observation["stationName"] ?? "",
                     locationId: locationKey,
-                    windSpeed: observation[""],
-                    windDirection: observation[""])
+                    windSpeed: observation["windSpeed"],
+                    windDirection: observation["windDirection"])
             mapView.addAnnotation(annotation)
         }
     }
@@ -166,4 +215,31 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     var observations: [String: [Dictionary<String, String>]] = [:]
+    let minWindSpeed = 0.01
+}
+
+// http://danlec.com/st4k#questions/27092354
+extension UIImage {
+    func rotate(degrees: Double) -> UIImage? {
+        let radians = degrees * Double.pi / 180.0
+        var newSize = CGRect(origin: CGPoint.zero, size: self.size).applying(CGAffineTransform(rotationAngle: CGFloat(radians))).size
+        // Trim off the extremely small float value to prevent core graphics from rounding it up
+        newSize.width = floor(newSize.width)
+        newSize.height = floor(newSize.height)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
+        let context = UIGraphicsGetCurrentContext()!
+
+        // Move origin to middle
+        context.translateBy(x: newSize.width/2, y: newSize.height/2)
+        // Rotate around middle
+        context.rotate(by: CGFloat(radians))
+        // Draw the image at its center
+        self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
+
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
+    }
 }
