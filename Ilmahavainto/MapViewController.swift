@@ -9,34 +9,10 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        mapView.delegate = self
-        let center = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
-        let coordinateSpan = MKCoordinateSpan(latitudeDelta: 0.6, longitudeDelta: 1.0)
-        mapView.setRegion(MKCoordinateRegion(center: center, span: coordinateSpan),
-            animated: false)
-    }
+    @IBOutlet weak var locateButton: UIButton!
 
-    override func viewWillAppear(_ animated: Bool) {
-        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        navigationController?.setNavigationBarHidden(false, animated: false)
-    }
-
-    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        let viewSpan = mapView.region.span
-        let center = mapView.region.center
-        if !animated {
-            loadObservations(center: center, viewSpan: viewSpan)
-        }
-    }
-    
     @IBAction func handleAboutButtonPress(_ sender: UIButton) {
         let aboutVC = UIAlertController(title: "About this application",
                                         message: "Copyright (c) 2015-2019 jaittola@iki.fi\nWeather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence\nWind icons: Wikimedia Commons, see https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg",
@@ -44,7 +20,55 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         aboutVC.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
         self.present(aboutVC, animated: true, completion: nil)
     }
-    
+
+    @IBAction func handleLocateButtonPress(_ sender: Any) {
+        guard let mv = mapView else { return }
+        mv.setCenter(mv.userLocation.coordinate, animated: true)
+    }
+
+    private var locationManager: CLLocationManager? = nil
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        mapView.delegate = self
+        let center = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
+        let coordinateSpan = MKCoordinateSpan(latitudeDelta: 0.6, longitudeDelta: 1.0)
+        mapView.setRegion(MKCoordinateRegion(center: center, span: coordinateSpan),
+            animated: false)
+        setupLocationUpdates()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        locationManager?.startUpdatingLocation()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        locationManager?.stopUpdatingLocation()
+    }
+
+    private func setupLocationUpdates() {
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
+        locationManager?.requestWhenInUseAuthorization()
+        locationManager?.startUpdatingLocation()
+    }
+
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        switch (status) {
+        case .authorizedAlways, .authorizedWhenInUse:
+            locateButton.isEnabled = true
+        default:
+            locateButton.isEnabled = false
+            break
+        }
+    }
+
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        loadObservations(center: mapView.region.center, viewSpan: mapView.region.span)
+    }
+
     func mapView(_ mapView: MKMapView, viewFor: MKAnnotation) -> MKAnnotationView? {
         guard let observationAnnotation = viewFor as? ObservationAnnotation else { return nil }
         if observationAnnotation.windSpeed >= minWindSpeed {
