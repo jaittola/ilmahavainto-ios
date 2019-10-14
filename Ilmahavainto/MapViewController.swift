@@ -173,19 +173,42 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     
     func displayObservations() {
-        mapView.removeAnnotations(mapView.annotations)
-        for (locationKey, observationArr) in observations {
-            guard let observation = observationArr.last else { continue }
-            guard let coordinate = makeCoordinate(observation) else { continue }
-            let annotation = ObservationAnnotation(
-                    coordinate: coordinate.coordinates,
-                    title: makeObservationText(observation),
-                    subtitle: observation["stationName"] ?? "",
-                    locationId: locationKey,
-                    windSpeed: observation["windSpeed"],
-                    windDirection: observation["windDirection"])
-            mapView.addAnnotation(annotation)
+        let newAnnotations = observations
+            .map { (locationKey, observationArr) -> ObservationAnnotation? in
+                    guard let observation = observationArr.last else { return nil }
+                    guard let coordinate = makeCoordinate(observation) else { return nil }
+                    return ObservationAnnotation(
+                            coordinate: coordinate.coordinates,
+                            title: makeObservationText(observation),
+                            subtitle: observation["stationName"] ?? "",
+                            locationId: locationKey,
+                            windSpeed: observation["windSpeed"],
+                            windDirection: observation["windDirection"],
+                            timestamp: observation["time"])
+                }
+            .compactMap { $0 }
+        let newAnnotationsMap = newAnnotations.reduce(into: [String: ObservationAnnotation]()) { (dict: inout [String: ObservationAnnotation], observation: ObservationAnnotation) in
+            dict[observation.locationId] = observation
         }
+
+        struct AnnotationModifications {
+            var toRemove: [ObservationAnnotation] = []
+            var idsToRetain: [String] = []
+        }
+
+        let currentAnnotations: [ObservationAnnotation] = mapView.annotations.map { (annotation) -> ObservationAnnotation? in annotation as? ObservationAnnotation }.compactMap { $0 }
+        let annotationModifications = currentAnnotations.reduce(into: AnnotationModifications()) { (modifications: inout AnnotationModifications, annotation: ObservationAnnotation) in
+            let isOutsideBounds = !mapView.visibleMapRect.contains(MKMapPoint(annotation.coordinate))
+            let isOutdated = annotation.timestamp < (newAnnotationsMap[annotation.locationId]?.timestamp ?? annotation.timestamp)
+            if (isOutsideBounds || isOutdated) {
+                modifications.toRemove.append(annotation)
+            } else {
+                modifications.idsToRetain.append(annotation.locationId)
+            }
+        }
+        let toAdd = newAnnotations.filter { !annotationModifications.idsToRetain.contains($0.locationId) }
+        mapView.removeAnnotations(annotationModifications.toRemove)
+        mapView.addAnnotations(toAdd)
     }
     
     func makeCoordinate(_ observation: [String: String]) -> Coordinates? {
