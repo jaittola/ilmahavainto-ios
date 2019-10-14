@@ -21,6 +21,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             animated: false)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let viewSpan = mapView.region.span
         let center = mapView.region.center
