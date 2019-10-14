@@ -120,10 +120,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 if let localizedDescription = error?.localizedDescription {
                     self.showAlert(localizedDescription)
                 }
-                guard let httpResponse = response as? HTTPURLResponse,
-                    (200...299).contains(httpResponse.statusCode) else {
-                        self.showAlert("Getting observation data failed ")
-                        return
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self.showAlert("Response is not a HTTPURLResponse")
+                    return
+                }
+                switch (httpResponse.statusCode) {
+                case 200...299:
+                    break;  // Ok
+                case 400...499:
+                    print("Got reply with response code \(httpResponse.statusCode)")
+                    return
+                default:
+                    self.showAlert("Getting observation data failed. Response code \(httpResponse.statusCode)")
+
                 }
                 if let dataValue = data {
                     self.handleObservationDataResponse(dataValue)
