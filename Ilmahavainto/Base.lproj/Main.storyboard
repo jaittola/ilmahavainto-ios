@@ -83,27 +83,30 @@
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ts-NC-KnR">
-                                <rect key="frame" x="354" y="44" width="40" height="40"/>
+                                <rect key="frame" x="364" y="44" width="30" height="30"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="40" id="9SR-l6-aCc"/>
-                                    <constraint firstAttribute="height" constant="40" id="sRh-6Z-W7U"/>
+                                    <constraint firstAttribute="width" constant="30" id="9SR-l6-aCc"/>
+                                    <constraint firstAttribute="height" constant="30" id="sRh-6Z-W7U"/>
                                 </constraints>
-                                <state key="normal" image="info.circle" catalog="system">
+                                <state key="normal" image="icons8-info-50">
                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                 </state>
+                                <state key="highlighted" image="icons8-info-filled-50"/>
                                 <connections>
                                     <action selector="handleAboutButtonPress:" destination="f1E-O6-rYE" eventType="touchUpInside" id="MVD-UU-tFV"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" reversesTitleShadowWhenHighlighted="YES" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K9i-By-udP">
-                                <rect key="frame" x="354" y="104" width="40" height="40"/>
+                                <rect key="frame" x="364" y="89" width="30" height="30"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="40" id="CEw-NS-gbl"/>
-                                    <constraint firstAttribute="height" constant="40" id="q25-Pg-YWF"/>
+                                    <constraint firstAttribute="width" constant="30" id="CEw-NS-gbl"/>
+                                    <constraint firstAttribute="height" constant="30" id="q25-Pg-YWF"/>
                                 </constraints>
-                                <state key="normal" image="location" catalog="system">
+                                <state key="normal" image="icons8-near-me-50">
                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                 </state>
+                                <state key="selected" image="icons-near-me-filled-50"/>
+                                <state key="highlighted" image="icons-near-me-filled-50"/>
                                 <connections>
                                     <action selector="handleLocateButtonPress:" destination="f1E-O6-rYE" eventType="primaryActionTriggered" id="Nj4-5Y-mny"/>
                                 </connections>
@@ -111,7 +114,7 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="K9i-By-udP" firstAttribute="top" secondItem="8ts-NC-KnR" secondAttribute="bottom" constant="20" id="4Uk-yw-1Bb"/>
+                            <constraint firstItem="K9i-By-udP" firstAttribute="top" secondItem="8ts-NC-KnR" secondAttribute="bottom" constant="15" id="4Uk-yw-1Bb"/>
                             <constraint firstItem="8ts-NC-KnR" firstAttribute="trailing" secondItem="LVM-tH-W4B" secondAttribute="trailingMargin" id="6xe-TN-jBA"/>
                             <constraint firstItem="K9i-By-udP" firstAttribute="trailing" secondItem="LVM-tH-W4B" secondAttribute="trailingMargin" id="8Hj-mp-UZo"/>
                             <constraint firstAttribute="bottom" secondItem="3A2-Gl-I2t" secondAttribute="bottom" id="Fbl-rd-xIR"/>
@@ -153,7 +156,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="info.circle" catalog="system" width="64" height="60"/>
-        <image name="location" catalog="system" width="64" height="56"/>
+        <image name="icons-near-me-filled-50" width="50" height="50"/>
+        <image name="icons8-info-50" width="50" height="50"/>
+        <image name="icons8-info-filled-50" width="50" height="50"/>
+        <image name="icons8-near-me-50" width="50" height="50"/>
     </resources>
 </document>

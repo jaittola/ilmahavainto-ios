@@ -15,7 +15,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     @IBAction func handleAboutButtonPress(_ sender: UIButton) {
         let aboutVC = UIAlertController(title: "About this application",
-                                        message: "Copyright (c) 2015-2019 jaittola@iki.fi\nWeather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence\nWind icons: Wikimedia Commons, see https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg",
+                                        message: "Copyright (c) 2015-2019 jaittola@iki.fi\nWeather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence\nWind icons: Wikimedia Commons, see https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg.\nOther icons: Near Me and Info icons by Icons8, https://icons8.com",
                                         preferredStyle: UIAlertController.Style.actionSheet)
         aboutVC.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
         self.present(aboutVC, animated: true, completion: nil)
