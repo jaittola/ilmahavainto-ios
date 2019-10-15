@@ -9,7 +9,8 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, ObservationModelDelegate {
+
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var locateButton: UIButton!
 
@@ -19,10 +20,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
 
     private var locationManager: CLLocationManager? = nil
+    private var model: ObservationModel? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
+        model = ObservationModel(self)
         let center = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
         let coordinateSpan = MKCoordinateSpan(latitudeDelta: 0.6, longitudeDelta: 1.0)
         mapView.setRegion(MKCoordinateRegion(center: center, span: coordinateSpan),
@@ -58,7 +61,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
 
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        loadObservations(center: mapView.region.center, viewSpan: mapView.region.span)
+        model?.loadObservations(center: mapView.region.center, viewSpan: mapView.region.span)
     }
 
     func mapView(_ mapView: MKMapView, viewFor: MKAnnotation) -> MKAnnotationView? {
@@ -126,65 +129,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let theModel = model else { return }
+
         if segue.identifier == "ShowObservationStation" {
             if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
-                (segue.destination as? ObservationDataViewController)?.observationStationData = observations[annotation.locationId]
+                (segue.destination as? ObservationDataViewController)?.observationStationData = theModel.observation(forLocationId: annotation.locationId)
             }
         }
     }
 
-    func loadObservations(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
-        let lat1 = roundTo3(center.latitude - viewSpan.latitudeDelta / 2)
-        let lat2 = roundTo3(center.latitude + viewSpan.latitudeDelta / 2)
-        let lon1 = roundTo3(center.longitude - viewSpan.longitudeDelta / 2)
-        let lon2 = roundTo3(center.longitude + viewSpan.longitudeDelta / 2)
-        if let url = URL(string:  "https://ilmaproxy.herokuapp.com/1/observations?lat1=\(lat1)&lat2=\(lat2)&lon1=\(lon1)&lon2=\(lon2)") {
-            Swift.print("=> Loading observations after map region change; approx pos range \(lat1) \(lon1) ,  \(lat2), \(lon2) from URL \(url)")
-            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-                if let localizedDescription = error?.localizedDescription {
-                    self.showAlert(localizedDescription)
-                }
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    self.showAlert("Response is not a HTTPURLResponse")
-                    return
-                }
-                switch (httpResponse.statusCode) {
-                case 200...299:
-                    break;  // Ok
-                case 400...499:
-                    print("Got reply with response code \(httpResponse.statusCode)")
-                    return
-                default:
-                    self.showAlert("Getting observation data failed. Response code \(httpResponse.statusCode)")
-
-                }
-                if let dataValue = data {
-                    self.handleObservationDataResponse(dataValue)
-                }
-            }
-            task.resume()
-        }
-    }
-    
-    func roundTo3(_ v: Double) -> Double {
-        return Double(round(1000 * v) / 1000)
+    func onError(_ message: String) {
+        showAlert(message)
     }
 
-    func handleObservationDataResponse(_ data: Data) {
-        let rawj = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as Any?
-        if let obsStations = rawj as? [ String:[ Dictionary<String, String> ] ] {
-            observations = obsStations
-        }
-        else {
-            observations = [:]
-            showAlert("Bad JSON data received")
-        }
-        
-        DispatchQueue.main.async {
-            self.displayObservations()
-        }
-    }
-    
     struct Coordinates {
         init(coordinates: CLLocationCoordinate2D, displayString: String) {
             self.coordinates = coordinates
@@ -196,7 +153,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     
-    func displayObservations() {
+    func onDisplayObservations(_ observations: [String: [Dictionary<String, String>]]) {
         let newAnnotations = observations
             .map { (locationKey, observationArr) -> ObservationAnnotation? in
                     guard let observation = observationArr.last else { return nil }
@@ -270,7 +227,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
     }
 
-    var observations: [String: [Dictionary<String, String>]] = [:]
     let minWindSpeed = 0.01
 }
 
