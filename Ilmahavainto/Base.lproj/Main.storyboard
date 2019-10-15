@@ -79,7 +79,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" showsScale="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3A2-Gl-I2t">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" rotateEnabled="NO" pitchEnabled="NO" showsUserLocation="YES" showsScale="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3A2-Gl-I2t">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ts-NC-KnR">
@@ -93,7 +93,7 @@
                                 </state>
                                 <state key="highlighted" image="icons8-info-filled-50"/>
                                 <connections>
-                                    <action selector="handleAboutButtonPress:" destination="f1E-O6-rYE" eventType="touchUpInside" id="MVD-UU-tFV"/>
+                                    <segue destination="dR4-NI-BZr" kind="show" id="N5Z-Yv-gKZ"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" reversesTitleShadowWhenHighlighted="YES" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K9i-By-udP">
@@ -136,6 +136,72 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="CnQ-rV-m7e" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="900" y="215"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="PHg-PI-aul">
+            <objects>
+                <viewController id="dR4-NI-BZr" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="jsR-VH-syn"/>
+                        <viewControllerLayoutGuide type="bottom" id="vTO-9Q-N8V"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="W92-EJ-ELU">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cJZ-v5-R7h">
+                                <rect key="frame" x="0.0" y="54.000000000000007" width="414" height="25.333333333333336"/>
+                                <attributedString key="attributedText">
+                                    <fragment content="About this application">
+                                        <attributes>
+                                            <font key="NSFont" size="22" name="Helvetica"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tQY-If-qOl">
+                                <rect key="frame" x="20" y="104.33333333333333" width="374" height="16.333333333333329"/>
+                                <attributedString key="attributedText">
+                                    <fragment content="© 2015-2019 jaittola@iki.fi">
+                                        <attributes>
+                                            <font key="NSFont" size="14" name="Helvetica"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9LR-yo-UyY">
+                                <rect key="frame" x="20" y="140.66666666666669" width="374" height="701.33333333333326"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <string key="text">Weather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence  Wind icons: Wikimedia Commons, see https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg  Other icons: Near Me, Info, and Dotted Cloud icons by Icons8, https://icons8.com </string>
+                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <dataDetectorType key="dataDetectorTypes" link="YES"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="tQY-If-qOl" firstAttribute="top" secondItem="cJZ-v5-R7h" secondAttribute="bottom" constant="25" id="E5I-CE-CaG"/>
+                            <constraint firstItem="9LR-yo-UyY" firstAttribute="trailing" secondItem="W92-EJ-ELU" secondAttribute="trailingMargin" id="HQY-KC-5Gf"/>
+                            <constraint firstItem="9LR-yo-UyY" firstAttribute="top" secondItem="tQY-If-qOl" secondAttribute="bottom" constant="20" id="KE3-ab-yhi"/>
+                            <constraint firstItem="vTO-9Q-N8V" firstAttribute="top" secondItem="9LR-yo-UyY" secondAttribute="bottom" constant="20" id="MvZ-NW-NiP"/>
+                            <constraint firstItem="tQY-If-qOl" firstAttribute="leading" secondItem="W92-EJ-ELU" secondAttribute="leadingMargin" id="P76-8x-82a"/>
+                            <constraint firstItem="cJZ-v5-R7h" firstAttribute="top" secondItem="jsR-VH-syn" secondAttribute="bottom" constant="10" id="Xrt-C0-Pq4"/>
+                            <constraint firstItem="9LR-yo-UyY" firstAttribute="leading" secondItem="W92-EJ-ELU" secondAttribute="leadingMargin" id="YM7-sa-lxi"/>
+                            <constraint firstAttribute="trailing" secondItem="cJZ-v5-R7h" secondAttribute="trailing" id="ldS-50-hom"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="tQY-If-qOl" secondAttribute="trailing" id="tPX-h0-Rwk"/>
+                            <constraint firstItem="cJZ-v5-R7h" firstAttribute="leading" secondItem="W92-EJ-ELU" secondAttribute="leading" id="zl7-hn-uW5"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="quU-O5-7zc"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="miJ-WQ-oPK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1716" y="215"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="QKY-AC-7yh">
