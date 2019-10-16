@@ -70,12 +70,12 @@ class ObservationModel {
     }
 
     func loadObservations(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
-        let lat1 = roundTo3(center.latitude - viewSpan.latitudeDelta / 2)
-        let lat2 = roundTo3(center.latitude + viewSpan.latitudeDelta / 2)
-        let lon1 = roundTo3(center.longitude - viewSpan.longitudeDelta / 2)
-        let lon2 = roundTo3(center.longitude + viewSpan.longitudeDelta / 2)
-        if let url = URL(string:  "https://ilmaproxy.herokuapp.com/1/observations?lat1=\(lat1)&lat2=\(lat2)&lon1=\(lon1)&lon2=\(lon2)") {
-            Swift.print("=> Loading observations after map region change; approx pos range \(lat1) \(lon1) ,  \(lat2), \(lon2) from URL \(url)")
+        let boundaries = CoordinateBoundaries(center: center, viewSpan: viewSpan)
+        if (boundaries.isEntirelyOutside(ObservationModel.supportedQueryRegion)) {
+            self.handleObservationDataResponse("{}".data(using: .utf8)!)
+        } else {
+            let url = boundaries.restrictTo(ObservationModel.supportedQueryRegion).queryURL()!
+            Swift.print("=> Loading observations after map region change from URL \(url)")
             let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let localizedDescription = error?.localizedDescription {
                     self.delegate.onError(localizedDescription)
@@ -116,8 +116,8 @@ class ObservationModel {
                         .compactMap { (obs) in Observation(stationId, obs ) }
                         .sorted { (a, b) in a.time <= b.time }
                     results[stationId] = observationValues
-                }
-                .compactMapValues { !$0.isEmpty ? $0 : nil }
+            }
+            .compactMapValues { !$0.isEmpty ? $0 : nil }
         }
         else {
             observations = [:]
@@ -132,4 +132,52 @@ class ObservationModel {
     private func roundTo3(_ v: Double) -> Double {
         return Double(round(1000 * v) / 1000)
     }
+
+    struct CoordinateBoundaries {
+        let north: Double
+        let east: Double
+        let south: Double
+        let west: Double
+
+        init(north: Double,
+             east: Double,
+             south: Double,
+             west: Double) {
+            self.north = north
+            self.east = east
+            self.south = south
+            self.west = west
+        }
+
+        init(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
+            south = center.latitude - viewSpan.latitudeDelta / 2
+            north = center.latitude + viewSpan.latitudeDelta / 2
+            west = center.longitude - viewSpan.longitudeDelta / 2
+            east = center.longitude + viewSpan.longitudeDelta / 2
+        }
+
+        func isEntirelyOutside(_ region: CoordinateBoundaries) -> Bool {
+            return east < region.west ||
+                west > region.east ||
+                north < region.south ||
+                south > region.north
+        }
+
+        func restrictTo(_ region: CoordinateBoundaries) -> CoordinateBoundaries {
+            return CoordinateBoundaries(north: min(north, region.north),
+                                        east: min(east, region.east),
+                                        south: max(south, region.south),
+                                        west: max(west, region.west))
+        }
+
+        func queryURL() -> URL? {
+            return URL(string: String(format: ObservationModel.apiURLFormat, south, north, west, east))
+        }
+    }
+
+    static let supportedQueryRegion = CoordinateBoundaries(north: 70.1,
+                                                           east: 31.6,
+                                                           south: 59.35,
+                                                           west: 19.1)
+    static let apiURLFormat = "https://ilmaproxy.herokuapp.com/1/observations?lat1=%.3f&lat2=%.3f&lon1=%.3f&lon2=%.3f"
 }
