@@ -8,8 +8,9 @@
 
 import UIKit
 import MapKit
+import RxSwift
 
-class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, ObservationModelDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var locateButton: UIButton!
@@ -20,12 +21,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
 
     private var locationManager: CLLocationManager? = nil
-    private var model: ObservationModel? = nil
+    private var modelSubscriptions: DisposeBag? = nil
+    private var errorSubscription: Disposable? = nil
+
+    private var model: ObservationModel {
+        get {
+            return (UIApplication.shared.delegate as! AppDelegate).observationModel!
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
-        model = ObservationModel(self)
         let center = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
         let coordinateSpan = MKCoordinateSpan(latitudeDelta: 0.6, longitudeDelta: 1.0)
         mapView.setRegion(MKCoordinateRegion(center: center, span: coordinateSpan),
@@ -35,12 +42,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.setNavigationBarHidden(true, animated: false)
+        modelSubscriptions = model.subscribeToObservations(onDisplayObservations: onDisplayObservations,
+                                             onError: onError)
         locationManager?.startUpdatingLocation()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        navigationController?.setNavigationBarHidden(false, animated: false)
         locationManager?.stopUpdatingLocation()
+        modelSubscriptions = nil
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
 
     private func setupLocationUpdates() {
@@ -61,7 +71,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
 
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        model?.loadObservations(center: mapView.region.center, viewSpan: mapView.region.span)
+        model.viewLocationChanged(center: mapView.region.center, viewSpan: mapView.region.span)
     }
 
     func mapView(_ mapView: MKMapView, viewFor: MKAnnotation) -> MKAnnotationView? {
@@ -132,20 +142,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let theModel = model else { return }
-
         if segue.identifier == "ShowObservationStation" {
             if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
-                (segue.destination as? ObservationDataViewController)?.observationStationData = theModel.observation(forLocationId: annotation.observation.locationId)
+                (segue.destination as? ObservationDataViewController)?.observationStationData = model.observation(forLocationId: annotation.observation.locationId)
             }
         }
     }
 
-    func onError(_ message: String) {
+    private func onError(_ message: String) {
         showAlert(message)
     }
 
-    func onDisplayObservations(_ observations: [String: [ObservationModel.Observation]]) {
+    private func onDisplayObservations(_ observations: [String: [ObservationModel.Observation]]) {
         let newAnnotations = observations
             .map { (locationKey, observationArr) -> ObservationAnnotation? in
                 guard let observation = observationArr.last else { return nil }

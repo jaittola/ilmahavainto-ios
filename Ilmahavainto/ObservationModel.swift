@@ -8,11 +8,7 @@
 
 import Foundation
 import MapKit
-
-protocol ObservationModelDelegate {
-    func onError(_ message: String)
-    func onDisplayObservations(_ observations: [String: [ObservationModel.Observation]])
-}
+import RxSwift
 
 class ObservationModel {
     struct Observation {
@@ -62,26 +58,78 @@ class ObservationModel {
         }
     }
 
-    private let delegate: ObservationModelDelegate
-    private var observations: [String: [Observation]] = [:]
+    private let boundariesSubject: PublishSubject<CoordinateBoundaries>
+    private let pausedSubject: BehaviorSubject<Bool>
+    private let observationsSubject: BehaviorSubject<[String: [Observation]]>
+    private let errorsSubject: PublishSubject<String>
+    private let disposeBag: DisposeBag
 
-    init(_ delegate: ObservationModelDelegate) {
-        self.delegate = delegate
+    private let backgroundScheduler = ConcurrentDispatchQueueScheduler.init(qos: .background)
+
+    init() {
+        boundariesSubject = PublishSubject()
+        pausedSubject = BehaviorSubject(value: true)
+        observationsSubject = BehaviorSubject(value: [:])
+        errorsSubject = PublishSubject()
+
+        disposeBag = DisposeBag()
+
+        let polling = pausedSubject
+            .distinctUntilChanged()
+            .flatMapLatest { isPaused -> Observable<Bool> in
+                return isPaused ?
+                    Observable.just(true) :
+                    Observable.concat(Observable.just(false),
+                                      Observable<Int>.interval(.seconds(600), scheduler: self.backgroundScheduler).map { _ in false } ) }
+        Observable.combineLatest(boundariesSubject, polling) { (boundaries, pollingPaused) in (boundaries, pollingPaused) }
+            .filter { (_, pollingPaused) in !pollingPaused }
+            .map { (boundaries, _) in boundaries }
+            .subscribe(onNext: self.onBoundariesUpdate)
+            .disposed(by: disposeBag)
     }
 
-    func loadObservations(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
-        let boundaries = CoordinateBoundaries(center: center, viewSpan: viewSpan)
+    func pause() {
+        pausedSubject.onNext(true)
+    }
+
+    func resume() {
+        pausedSubject.onNext(false)
+    }
+
+    func subscribeToObservations(onDisplayObservations: @escaping ([String: [Observation]]) -> Void,
+                                 onError: @escaping (String) -> Void) -> DisposeBag {
+        let bag = DisposeBag()
+        observationsSubject
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onDisplayObservations)
+            .disposed(by: bag)
+        errorsSubject
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onError)
+            .disposed(by: bag)
+        return bag
+    }
+
+    func viewLocationChanged(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
+        boundariesSubject.onNext(CoordinateBoundaries(center: center, viewSpan: viewSpan))
+    }
+
+    func observation(forLocationId: String) -> [Observation]? {
+        return try? observationsSubject.value()[forLocationId]
+    }
+
+    private func onBoundariesUpdate(boundaries: CoordinateBoundaries) {
         if (boundaries.isEntirelyOutside(ObservationModel.supportedQueryRegion)) {
-            self.handleObservationDataResponse("{}".data(using: .utf8)!)
+            observationsSubject.onNext([:])
         } else {
             let url = boundaries.restrictTo(ObservationModel.supportedQueryRegion).queryURL()!
             Swift.print("=> Loading observations after map region change from URL \(url)")
             let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let localizedDescription = error?.localizedDescription {
-                    self.delegate.onError(localizedDescription)
+                    self.errorsSubject.onNext(localizedDescription)
                 }
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    self.delegate.onError("Response is not a HTTPURLResponse")
+                    self.errorsSubject.onNext("Response is not a HTTPURLResponse")
                     return
                 }
                 switch (httpResponse.statusCode) {
@@ -91,49 +139,36 @@ class ObservationModel {
                     print("Got reply with response code \(httpResponse.statusCode)")
                     return
                 default:
-                    self.delegate.onError("Getting observation data failed. Response code \(httpResponse.statusCode)")
+                    self.errorsSubject.onNext("Getting observation data failed. Response code \(httpResponse.statusCode)")
 
                 }
                 if let dataValue = data {
-                    self.handleObservationDataResponse(dataValue)
+                    let rawj = try? JSONSerialization.jsonObject(with: dataValue, options: JSONSerialization.ReadingOptions(rawValue: 0)) as Any?
+                    if let obsStations = rawj as? [ String:[ Dictionary<String, String> ] ] {
+                        self.observationsSubject.onNext(
+                            obsStations
+                                .reduce(into: Dictionary<String, [Observation]>()) { (results, keyvalue) in
+                                    let (stationId, observationDictionaryArray) = keyvalue
+                                    let observationValues = observationDictionaryArray
+                                        .compactMap { (obs) in Observation(stationId, obs ) }
+                                        .sorted { (a, b) in a.time <= b.time }
+                                    results[stationId] = observationValues
+                            }
+                            .compactMapValues { !$0.isEmpty ? $0 : nil }
+                        )
+                    }
+                    else {
+                        self.observationsSubject.onNext([:])
+                        self.errorsSubject.onNext("Bad JSON data received")
+                    }
                 }
             }
             task.resume()
         }
     }
 
-    func observation(forLocationId: String) -> [Observation]? {
-        return observations[forLocationId]
-    }
 
-    private func handleObservationDataResponse(_ data: Data) {
-        let rawj = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as Any?
-        if let obsStations = rawj as? [ String:[ Dictionary<String, String> ] ] {
-            observations = obsStations
-                .reduce(into: Dictionary<String, [Observation]>()) { (results, keyvalue) in
-                    let (stationId, observationDictionaryArray) = keyvalue
-                    let observationValues = observationDictionaryArray
-                        .compactMap { (obs) in Observation(stationId, obs ) }
-                        .sorted { (a, b) in a.time <= b.time }
-                    results[stationId] = observationValues
-            }
-            .compactMapValues { !$0.isEmpty ? $0 : nil }
-        }
-        else {
-            observations = [:]
-            delegate.onError("Bad JSON data received")
-        }
-
-        DispatchQueue.main.async {
-            self.delegate.onDisplayObservations(self.observations)
-        }
-    }
-
-    private func roundTo3(_ v: Double) -> Double {
-        return Double(round(1000 * v) / 1000)
-    }
-
-    struct CoordinateBoundaries {
+    private struct CoordinateBoundaries {
         let north: Double
         let east: Double
         let south: Double
@@ -175,9 +210,9 @@ class ObservationModel {
         }
     }
 
-    static let supportedQueryRegion = CoordinateBoundaries(north: 70.1,
-                                                           east: 31.6,
-                                                           south: 59.35,
-                                                           west: 19.1)
-    static let apiURLFormat = "https://ilmaproxy.herokuapp.com/1/observations?lat1=%.3f&lat2=%.3f&lon1=%.3f&lon2=%.3f"
+    private static let supportedQueryRegion = CoordinateBoundaries(north: 70.1,
+                                                                   east: 31.6,
+                                                                   south: 59.35,
+                                                                   west: 19.1)
+    private static let apiURLFormat = "https://ilmaproxy.herokuapp.com/1/observations?lat1=%.3f&lat2=%.3f&lon1=%.3f&lon2=%.3f"
 }
