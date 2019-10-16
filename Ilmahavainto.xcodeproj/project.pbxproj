@@ -17,7 +17,6 @@
 		4F1AC1F31B6B63B200A46721 /* IlmahavaintoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F1AC1F21B6B63B200A46721 /* IlmahavaintoTests.swift */; };
 		4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */; };
 		4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */; };
-		4F2F11761B6BD7AC001F31D4 /* ObservationMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */; };
 		4F39C074234E02B30087887A /* ObservationAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F39C073234E02B30087887A /* ObservationAnnotation.swift */; };
 		4F61A6531B70E85D000434C5 /* ObservationUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F61A6521B70E85D000434C5 /* ObservationUtils.swift */; };
 		4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F96494F1B6F404F005B6D7A /* MapViewController.swift */; };
@@ -62,7 +61,6 @@
 		4F1AC1F21B6B63B200A46721 /* IlmahavaintoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IlmahavaintoTests.swift; sourceTree = "<group>"; };
 		4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationDataViewController.swift; sourceTree = "<group>"; };
 		4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationTableViewCell.swift; sourceTree = "<group>"; };
-		4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationMapping.swift; sourceTree = "<group>"; };
 		4F39C073234E02B30087887A /* ObservationAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationAnnotation.swift; sourceTree = "<group>"; };
 		4F61A6521B70E85D000434C5 /* ObservationUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservationUtils.swift; sourceTree = "<group>"; };
 		4F96494F1B6F404F005B6D7A /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -125,7 +123,6 @@
 				4F96494F1B6F404F005B6D7A /* MapViewController.swift */,
 				4F1AC1FC1B6B79A300A46721 /* ObservationDataViewController.swift */,
 				4F2F11731B6BD420001F31D4 /* ObservationTableViewCell.swift */,
-				4F2F11751B6BD7AC001F31D4 /* ObservationMapping.swift */,
 				4F61A6521B70E85D000434C5 /* ObservationUtils.swift */,
 				4F1AC1E31B6B63B200A46721 /* Images.xcassets */,
 				4F1AC1E51B6B63B200A46721 /* LaunchScreen.xib */,
@@ -268,7 +265,6 @@
 				4F2F11741B6BD420001F31D4 /* ObservationTableViewCell.swift in Sources */,
 				4F1AC1FD1B6B79A300A46721 /* ObservationDataViewController.swift in Sources */,
 				4F9649501B6F404F005B6D7A /* MapViewController.swift in Sources */,
-				4F2F11761B6BD7AC001F31D4 /* ObservationMapping.swift in Sources */,
 				4F03E2A62355C64D00B47E6A /* ObservationModel.swift in Sources */,
 				4F61A6531B70E85D000434C5 /* ObservationUtils.swift in Sources */,
 			);

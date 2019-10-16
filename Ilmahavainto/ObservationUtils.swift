@@ -19,25 +19,20 @@ class ObservationUtils: NSObject {
         return String(format: "%@ %d° %.3f'", hemisphere, degrees, fraction)
     }
     
-    class func makeCoordinateString(lat: String?, lon: String?) -> String {
-        guard let lat2 = lat else { return "" }
-        guard let lon2 = lon else { return "" }
-
-        let latText = makeSexagesimal(decimalDegree: NSString(string: lat2).doubleValue, isLatitude: true)
-        let lonText = makeSexagesimal(decimalDegree: NSString(string: lon2).doubleValue, isLatitude: false)
+    class func makeCoordinateString(lat: Double, lon: Double) -> String {
+        let latText = makeSexagesimal(decimalDegree: lat, isLatitude: true)
+        let lonText = makeSexagesimal(decimalDegree: lon, isLatitude: false)
 
         return "\(latText) \(lonText)"
     }
 
-    class func windDirection(_ wind: String?) -> String {
+    class func windDirection(_ wind: Double?) -> String? {
         let windDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "W"]
-        if let wd = wind {
-            let roundedWind = round(NSString(string: wd).doubleValue)
-            let windSectorIdx = Int(roundedWind + 22) / 45
-            let windSector = windSectorIdx < windDirections.count ? windDirections[windSectorIdx] : ""
-            return String(format: "%@ (%.0f°)", windSector, roundedWind)
-        }
-        return ""
+        guard let wd = wind else { return nil }
+        let roundedWind = round(wd)
+        let windSectorIdx = Int(roundedWind + 22) / 45
+        let windSector = windSectorIdx < windDirections.count ? windDirections[windSectorIdx] : ""
+        return String(format: "%@ (%.0f°)", windSector, roundedWind)
     }
     
 }

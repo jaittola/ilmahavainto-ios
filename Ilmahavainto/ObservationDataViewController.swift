@@ -20,24 +20,23 @@ class ObservationDataViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func updateObservations(_ observations: [String: String]) {
+    func updateObservations(_ observation: ObservationModel.Observation) {
         displayArray.removeAll(keepingCapacity: true)
         for m in observationMappings {
-            if let observation = observations[m.parameter] {
-                    displayArray.append((m.title, m.format(observation)))
+            if let value = m.formatter(observation) {
+                displayArray.append((m.title, value))
             }
         }
-        stationName = observations["stationName"] ?? ""
-        coordString = ObservationUtils.makeCoordinateString(lat: observations["lat"], lon: observations["long"])
-        observationTimestamp = observationTimestamp(observations["time"])
+        stationName = observation.stationName
+        coordString = ObservationUtils.makeCoordinateString(lat: observation.coordinates.latitude,
+                                                            lon: observation.coordinates.longitude)
+        observationTimestamp = observationTimestamp(observation.time)
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
 
-    private func observationTimestamp(_ timestamp: String?) -> String {
-        guard let ts = timestamp else { return "" }
-        let date = Date(timeIntervalSince1970: NSString(string: ts).doubleValue)
+    private func observationTimestamp(_ date: Date) -> String {
         return DateFormatter.localizedString(from: date,
                                              dateStyle: DateFormatter.Style.short,
                                              timeStyle: DateFormatter.Style.short)
@@ -68,47 +67,56 @@ class ObservationDataViewController: UITableViewController {
         return cell
     }
     
-    class func stripDecimals(_ value: String) -> String {
-        return (NSString(format: "%.0f", round((value as NSString).floatValue)) as String)
+    class func stripDecimals(_ value: Double?) -> String? {
+        if let v = value {
+            return String(format: "%.0f", round(v))
+        } else {
+            return nil
+        }
     }
 
-    var observationStationData: [Dictionary<String, String>]? {
+    var observationStationData: [ObservationModel.Observation]? {
         didSet {
             if let sd = observationStationData?.last {
                 updateObservations(sd)
             }
         }
     }
-    
-    var stationName = ""
-    var coordString = ""
-    var observationTimestamp = ""
-    var displayArray: [ (String, String) ] = []
-    var observationMappings = [
-        ObservationMapping(title: "Temperature", parameter: "airTemperature",
-            formatter: { (value: String) -> String in value + "°C" }),
-        ObservationMapping(title: "Wind Direction", parameter: "windDirection",
-            formatter: { (value: String) -> String in
-                ObservationUtils.windDirection(value)
-            }),
-        ObservationMapping(title: "Average wind speed", parameter: "windSpeed",
-            formatter: { (value: String) -> String in value + " m/s"}),
-        ObservationMapping(title: "Gust wind speed", parameter: "windSpeedGust",
-            formatter: { (value: String) -> String in value + " m/s"}),
-        ObservationMapping(title: "Cloud cover (0/8)", parameter: "amountOfCloud",
-            formatter: { (value: String) -> String in
-                ObservationDataViewController.stripDecimals(value) }),
-        ObservationMapping(title: "Visibility", parameter: "visibility",
-            formatter: { (value: String) -> String in
-                let valueKm = (value as NSString).floatValue / 1000.0
-                return (NSString(format: "%.0f km", valueKm) as String)
-            }),
-        ObservationMapping(title: "Amount of precipitation", parameter: "precipitationAmount",
-            formatter: { (value: String) -> String in value + " mm"
-        }),
-        ObservationMapping(title: "Relative humidity", parameter: "relativeHumidity",
-            formatter: {(value: String) -> String in
-                ObservationDataViewController.stripDecimals(value) + " %" }),
+
+    private var stationName = ""
+    private var coordString = ""
+    private var observationTimestamp = ""
+    private var displayArray: [ (String, String) ] = []
+
+    private struct ObservationMapping {
+        let title: String
+        let formatter: (ObservationModel.Observation) -> String?
+        static func doubleFormatter(_ value: Double?, _ format: String, _ valueFilter: (Double) -> Double = { $0 }) -> String? {
+            if let v = value {
+                return String(format: format, valueFilter(v))
+            } else {
+                return nil
+            }
+        }
+    }
+
+    private let observationMappings = [
+        ObservationMapping(title: "Temperature",
+                           formatter: { ObservationMapping.doubleFormatter($0.airTemperature, "%.01f°C") }),
+        ObservationMapping(title: "Wind Direction",
+                           formatter: { ObservationUtils.windDirection($0.windDirection) }),
+        ObservationMapping(title: "Average wind speed",
+                           formatter: { ObservationMapping.doubleFormatter($0.windSpeed, "%.01f m/s") }),
+        ObservationMapping(title: "Gust wind speed",
+                           formatter: { ObservationMapping.doubleFormatter($0.windSpeedGust, "%.01f m/s") }),
+        ObservationMapping(title: "Cloud cover (0/8)",
+                           formatter: { ObservationMapping.doubleFormatter($0.amountOfCloud, "%.0f", round) }),
+        ObservationMapping(title: "Visibility",
+                           formatter: { obs in ObservationMapping.doubleFormatter(obs.visibility, "%.0f km", { $0/1000.0 }) }),
+        ObservationMapping(title: "Amount of precipitation",
+                           formatter: { ObservationMapping.doubleFormatter($0.precipitationAmount, "%.0f mm") }),
+        ObservationMapping(title: "Relative humidity",
+                           formatter: { ObservationMapping.doubleFormatter($0.relativeHumidity, "%.0f %%", round) })
     ]
 }
 
