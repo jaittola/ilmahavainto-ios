@@ -1,0 +1,23 @@
+/* 
+  Localizable.strings
+  Ilmahavainto
+
+  Created by Jukka Aittola on 16/10/2019.
+  Copyright © 2019 Jukka Aittola. All rights reserved.
+*/
+"Temperature" = "Lämpötila";
+"Wind Direction" = "Tuulen suunta";
+"Average wind speed" = "Tuulen nopeus";
+"Gust wind speed" = "Tuulen nopeus puuskissa";
+"Cloud cover (0/8)" = "Pilvisyys (0/8)";
+"Visibility" = "Näkyvyys";
+"Amount of precipitation" = "Sademäärä";
+"Relative humidity" = "Suhteellinen kosteus";
+
+"app-info" = "Sovellus näyttää säähavaintoja Suomesta. Havainnot haetaan Ilmatieteen laitoksen avoimista rajapinnoista. Sovellus esittää tuulen suunnan ja nopeuden kartalla tuulinuolten avulla. Jos havaintoasemalla ei ole tuulimittauksia, aseman sijainti näkyy kartalla neulanmuotoisena ikonina. Klikkaamalla ikonia avautuu säähavaintoja ja tietoja asemasta.
+
+Säätiedot: Ilmatieteen laitoksen avoin data. Lisenssi ja käyttöehdot: https://ilmatieteenlaitos.fi/avoin-data-lisenssi
+
+Tuuli-ikonit: Wikimedia Commons, ks. https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg
+
+Muut ikonit: Near Me, Info ja Dotted Cloud -ikonit: Icons8, ks. https://icons8.com";

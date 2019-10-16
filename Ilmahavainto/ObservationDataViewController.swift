@@ -48,7 +48,7 @@ class ObservationDataViewController: UITableViewController {
         }
         else {
             return (stationName != "" ? "\(stationName) (\(coordString))" : coordString) +
-                " at " + observationTimestamp
+                " " + observationTimestamp
         }
     }
     
@@ -62,7 +62,7 @@ class ObservationDataViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ObservationValueCell") as! ObservationTableViewCell
-        cell.title.text = displayArray[cellForRowAt.row].0
+        cell.title.text = NSLocalizedString(displayArray[cellForRowAt.row].0, comment: "")
         cell.value.text = displayArray[cellForRowAt.row].1
         return cell
     }

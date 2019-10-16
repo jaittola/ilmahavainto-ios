@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Ilmahavainto
+
+  Created by Jukka Aittola on 16/10/2019.
+  Copyright © 2019 Jukka Aittola. All rights reserved.
+*/
+"app-info" = "This application displays weather observations from Finland based on Finnish Meteorological institute's Open Data. Wind direction and speed are shown with wind barbs for each observation station, and stations without wind observations are shown with pins. Tapping on a station shows more observations and details about the observation station.
+
+Weather data source: Finnish Meteorological Institute Open Data. For details about the licensing of the weather data, see http://en.ilmatieteenlaitos.fi/open-data-licence
+
+Wind icons: Wikimedia Commons, see https://commons.wikimedia.org/wiki/File:Symbol_wind_speed_01.svg
+
+Other icons: Near Me, Info, and Dotted Cloud icons by Icons8, https://icons8.com";

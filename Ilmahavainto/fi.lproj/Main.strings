@@ -1,0 +1,10 @@
+/* Class = "UINavigationItem"; title = "Observations"; ObjectID = "B2X-o5-YcL"; */
+"B2X-o5-YcL.title" = "Säähavainnot";
+
+/* Class = "UILabel"; text = "Value"; ObjectID = "C3M-eK-khc"; */
+"C3M-eK-khc.text" = "Mittaustulos";
+
+/* Class = "UILabel"; text = "Observation title"; ObjectID = "Zg8-5t-XO2"; */
+"Zg8-5t-XO2.text" = "Havainto";
+
+"quU-O5-7zc.title" = "Tietoja sovelluksesta";
