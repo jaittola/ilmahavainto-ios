@@ -121,12 +121,20 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Timestamp of observations" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZuK-hr-3s4">
+                                <rect key="frame" x="20" y="44" width="175.66666666666666" height="17"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="K9i-By-udP" firstAttribute="top" secondItem="8ts-NC-KnR" secondAttribute="bottom" constant="15" id="4Uk-yw-1Bb"/>
+                            <constraint firstItem="ZuK-hr-3s4" firstAttribute="leading" secondItem="LVM-tH-W4B" secondAttribute="leadingMargin" id="5EX-EC-AYu"/>
                             <constraint firstItem="8ts-NC-KnR" firstAttribute="trailing" secondItem="LVM-tH-W4B" secondAttribute="trailingMargin" id="6xe-TN-jBA"/>
                             <constraint firstItem="K9i-By-udP" firstAttribute="trailing" secondItem="LVM-tH-W4B" secondAttribute="trailingMargin" id="8Hj-mp-UZo"/>
+                            <constraint firstItem="ZuK-hr-3s4" firstAttribute="top" secondItem="cH5-mA-jLM" secondAttribute="bottom" id="ED6-Qn-akW"/>
                             <constraint firstAttribute="bottom" secondItem="3A2-Gl-I2t" secondAttribute="bottom" id="Fbl-rd-xIR"/>
                             <constraint firstItem="3A2-Gl-I2t" firstAttribute="top" secondItem="LVM-tH-W4B" secondAttribute="top" id="GeR-jS-NTm"/>
                             <constraint firstItem="nzx-Q5-BRC" firstAttribute="leading" secondItem="LVM-tH-W4B" secondAttribute="leadingMargin" id="HRz-ix-m6w"/>
@@ -147,6 +155,7 @@
                         <outlet property="locateButton" destination="K9i-By-udP" id="1BB-pM-aRa"/>
                         <outlet property="mapView" destination="3A2-Gl-I2t" id="YlH-EZ-QjD"/>
                         <outlet property="outsideBoundsLabel" destination="nzx-Q5-BRC" id="6WT-S3-qWQ"/>
+                        <outlet property="timestampLabel" destination="ZuK-hr-3s4" id="VNj-gZ-L0C"/>
                         <segue destination="LoR-WX-q4P" kind="show" identifier="ShowObservationStation" id="ciD-3f-5sf"/>
                     </connections>
                 </viewController>

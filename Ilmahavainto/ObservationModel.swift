@@ -179,8 +179,8 @@ class ObservationModel {
                                   errors: errorsSubject.asObservable())
     }
 
-    func viewLocationChanged(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
-        boundariesSubject.onNext(CoordinateBoundaries(center: center, viewSpan: viewSpan))
+    func viewLocationChanged(_ boundaries: CoordinateBoundaries) {
+        boundariesSubject.onNext(boundaries)
     }
 
     func observation(forLocationId: String) -> Observable<[ObservationModel.Observation]> {
