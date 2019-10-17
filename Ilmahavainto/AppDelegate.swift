@@ -44,7 +44,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         observationModel = nil
     }
-
-
 }
 
+class Globals {
+    static func model() -> ObservationModel {
+        return (UIApplication.shared.delegate as! AppDelegate).observationModel!
+    }
+}

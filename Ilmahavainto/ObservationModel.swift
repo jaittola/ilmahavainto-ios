@@ -145,8 +145,10 @@ class ObservationModel {
         boundariesSubject.onNext(CoordinateBoundaries(center: center, viewSpan: viewSpan))
     }
 
-    func observation(forLocationId: String) -> [Observation]? {
-        return try? observationsSubject.value()[forLocationId]
+    func observation(forLocationId: String) -> Observable<[ObservationModel.Observation]> {
+        return observationsSubject
+            .map { observations in observations[forLocationId] ?? [] }
+            .observeOn(MainScheduler.instance)
     }
 
     private func onBoundariesUpdate(boundaries: CoordinateBoundaries) {

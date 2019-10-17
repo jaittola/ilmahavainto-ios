@@ -7,30 +7,38 @@
 //
 
 import UIKit
+import RxSwift
 
 class ObservationDataViewController: UITableViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    func setStationId(_ stationId: String) {
+        self.stationId.onNext(stationId)
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override func viewWillAppear(_ animated: Bool) {
+        subscription = self.stationId
+            .flatMapLatest { (stationId) in stationId.isEmpty ? Observable.just([]) : Globals.model().observation(forLocationId: stationId) }
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: updateObservations)
     }
-    
-    func updateObservations(_ observation: ObservationModel.Observation) {
+
+    override func viewWillDisappear(_ animated: Bool) {
+        subscription?.dispose()
+    }
+
+    private func updateObservations(_ observations: [ObservationModel.Observation]) {
         displayArray.removeAll(keepingCapacity: true)
-        for m in observationMappings {
-            if let value = m.formatter(observation) {
-                displayArray.append((m.title, value))
+        if let observation = observations.last {
+            for m in observationMappings {
+                if let value = m.formatter(observation) {
+                    displayArray.append((m.title, value))
+                }
             }
+            stationName = observation.stationName
+            coordString = ObservationUtils.makeCoordinateString(lat: observation.coordinates.latitude,
+                                                                lon: observation.coordinates.longitude)
+            observationTimestamp = observationTimestamp(observation.time)
         }
-        stationName = observation.stationName
-        coordString = ObservationUtils.makeCoordinateString(lat: observation.coordinates.latitude,
-                                                            lon: observation.coordinates.longitude)
-        observationTimestamp = observationTimestamp(observation.time)
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
@@ -41,7 +49,7 @@ class ObservationDataViewController: UITableViewController {
                                              dateStyle: DateFormatter.Style.short,
                                              timeStyle: DateFormatter.Style.short)
     }
-    
+
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if coordString.isEmpty || observationTimestamp.isEmpty {
             return ""
@@ -51,46 +59,33 @@ class ObservationDataViewController: UITableViewController {
                 " " + observationTimestamp
         }
     }
-    
+
     override func numberOfSections(in: UITableView) -> Int {
         return displayArray.isEmpty ? 0 : 1
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayArray.count
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ObservationValueCell") as! ObservationTableViewCell
         cell.title.text = NSLocalizedString(displayArray[cellForRowAt.row].0, comment: "")
         cell.value.text = displayArray[cellForRowAt.row].1
         return cell
     }
-    
-    class func stripDecimals(_ value: Double?) -> String? {
-        if let v = value {
-            return String(format: "%.0f", round(v))
-        } else {
-            return nil
-        }
-    }
 
-    var observationStationData: [ObservationModel.Observation]? {
-        didSet {
-            if let sd = observationStationData?.last {
-                updateObservations(sd)
-            }
-        }
-    }
-
+    private var stationId = BehaviorSubject(value: "")
     private var stationName = ""
     private var coordString = ""
     private var observationTimestamp = ""
     private var displayArray: [ (String, String) ] = []
+    private var subscription: Disposable? = nil
 
     private struct ObservationMapping {
         let title: String
         let formatter: (ObservationModel.Observation) -> String?
+
         static func doubleFormatter(_ value: Double?, _ format: String, _ valueFilter: (Double) -> Double = { $0 }) -> String? {
             if let v = value {
                 return String(format: format, valueFilter(v))

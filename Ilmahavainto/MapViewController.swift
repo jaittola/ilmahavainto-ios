@@ -26,12 +26,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     private var modelSubscriptions: DisposeBag? = nil
     private var errorSubscription: Disposable? = nil
 
-    private var model: ObservationModel {
-        get {
-            return (UIApplication.shared.delegate as! AppDelegate).observationModel!
-        }
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
@@ -44,9 +38,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.setNavigationBarHidden(true, animated: false)
-        modelSubscriptions = model.subscribeToObservations(onDisplayObservations: onDisplayObservations,
-                                                           onModelStatusChanged: onModelStatusChanged,
-                                                           onError: onError)
+        modelSubscriptions = Globals.model().subscribeToObservations(onDisplayObservations: onDisplayObservations,
+                                                                     onModelStatusChanged: onModelStatusChanged,
+                                                                     onError: onError)
         locationManager?.startUpdatingLocation()
     }
 
@@ -74,7 +68,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
 
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        model.viewLocationChanged(center: mapView.region.center, viewSpan: mapView.region.span)
+        Globals.model().viewLocationChanged(center: mapView.region.center, viewSpan: mapView.region.span)
     }
 
     func mapView(_ mapView: MKMapView, viewFor: MKAnnotation) -> MKAnnotationView? {
@@ -147,7 +141,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowObservationStation" {
             if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
-                (segue.destination as? ObservationDataViewController)?.observationStationData = model.observation(forLocationId: annotation.observation.locationId)
+                (segue.destination as? ObservationDataViewController)?.setStationId(annotation.observation.locationId)
             }
         }
     }
