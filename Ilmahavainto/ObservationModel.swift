@@ -70,6 +70,51 @@ class ObservationModel {
         case RegionNotAvailable
     }
 
+    struct CoordinateBoundaries {
+        let north: Double
+        let east: Double
+        let south: Double
+        let west: Double
+
+        init(north: Double,
+             east: Double,
+             south: Double,
+             west: Double) {
+            self.north = north
+            self.east = east
+            self.south = south
+            self.west = west
+        }
+
+        init(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
+            south = center.latitude - viewSpan.latitudeDelta / 2
+            north = center.latitude + viewSpan.latitudeDelta / 2
+            west = center.longitude - viewSpan.longitudeDelta / 2
+            east = center.longitude + viewSpan.longitudeDelta / 2
+        }
+
+        func isEntirelyOutside(_ region: CoordinateBoundaries) -> Bool {
+            return east < region.west ||
+                west > region.east ||
+                north < region.south ||
+                south > region.north
+        }
+
+        func restrictTo(_ region: CoordinateBoundaries) -> CoordinateBoundaries {
+            return CoordinateBoundaries(north: min(north, region.north),
+                                        east: min(east, region.east),
+                                        south: max(south, region.south),
+                                        west: max(west, region.west))
+        }
+
+        func contains(_ coordinates: CLLocationCoordinate2D) -> Bool {
+            return coordinates.latitude >= south &&
+                coordinates.latitude <= north &&
+                coordinates.longitude >= west &&
+                coordinates.longitude <= east
+        }
+    }
+
     private let boundariesSubject: PublishSubject<CoordinateBoundaries>
     private let pausedSubject: BehaviorSubject<Bool>
     private let observationsSubject: BehaviorSubject<[String: [Observation]]>
@@ -148,7 +193,7 @@ class ObservationModel {
         if (boundaries.isEntirelyOutside(ObservationModel.supportedQueryRegion)) {
             observationsSubject.onNext([:])
         } else {
-            let url = boundaries.restrictTo(ObservationModel.supportedQueryRegion).queryURL()!
+            let url = queryURL(boundaries.restrictTo(ObservationModel.supportedQueryRegion))!
             Swift.print("=> Loading observations after map region change from URL \(url)")
             let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
                 self.querying.onNext(false)
@@ -195,47 +240,12 @@ class ObservationModel {
         }
     }
 
-
-    private struct CoordinateBoundaries {
-        let north: Double
-        let east: Double
-        let south: Double
-        let west: Double
-
-        init(north: Double,
-             east: Double,
-             south: Double,
-             west: Double) {
-            self.north = north
-            self.east = east
-            self.south = south
-            self.west = west
-        }
-
-        init(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
-            south = center.latitude - viewSpan.latitudeDelta / 2
-            north = center.latitude + viewSpan.latitudeDelta / 2
-            west = center.longitude - viewSpan.longitudeDelta / 2
-            east = center.longitude + viewSpan.longitudeDelta / 2
-        }
-
-        func isEntirelyOutside(_ region: CoordinateBoundaries) -> Bool {
-            return east < region.west ||
-                west > region.east ||
-                north < region.south ||
-                south > region.north
-        }
-
-        func restrictTo(_ region: CoordinateBoundaries) -> CoordinateBoundaries {
-            return CoordinateBoundaries(north: min(north, region.north),
-                                        east: min(east, region.east),
-                                        south: max(south, region.south),
-                                        west: max(west, region.west))
-        }
-
-        func queryURL() -> URL? {
-            return URL(string: String(format: ObservationModel.apiURLFormat, south, north, west, east))
-        }
+    private func queryURL(_ boundaries: CoordinateBoundaries) -> URL? {
+        return URL(string: String(format: ObservationModel.apiURLFormat,
+                                  boundaries.south,
+                                  boundaries.north,
+                                  boundaries.west,
+                                  boundaries.east))
     }
 
     private static let supportedQueryRegion = CoordinateBoundaries(north: 70.1,
