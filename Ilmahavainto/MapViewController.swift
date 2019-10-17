@@ -24,7 +24,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     private var locationManager: CLLocationManager? = nil
     private var modelSubscriptions: DisposeBag? = nil
-    private var errorSubscription: Disposable? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,9 +37,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.setNavigationBarHidden(true, animated: false)
-        modelSubscriptions = Globals.model().subscribeToObservations(onDisplayObservations: onDisplayObservations,
-                                                                     onModelStatusChanged: onModelStatusChanged,
-                                                                     onError: onError)
+        let subscriptions = DisposeBag()
+        let modelItems = Globals.model().observations()
+        modelItems.observations
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onDisplayObservations)
+            .disposed(by: subscriptions)
+        modelItems.modelStatus
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onModelStatusChanged)
+            .disposed(by: subscriptions)
+        modelItems.errors
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onError)
+            .disposed(by: subscriptions)
+        modelSubscriptions = subscriptions
         locationManager?.startUpdatingLocation()
     }
 

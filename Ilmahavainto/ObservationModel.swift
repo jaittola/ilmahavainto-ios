@@ -58,6 +58,12 @@ class ObservationModel {
         }
     }
 
+    struct ObservationStreams {
+        let observations: Observable<[String: [Observation]]>
+        let modelStatus: Observable<ModelStatus>
+        let errors: Observable<String>
+    }
+
     enum ModelStatus {
         case Ready
         case Querying
@@ -122,23 +128,10 @@ class ObservationModel {
         pausedSubject.onNext(false)
     }
 
-    func subscribeToObservations(onDisplayObservations: @escaping ([String: [Observation]]) -> Void,
-                                 onModelStatusChanged: @escaping (ModelStatus) -> Void,
-                                 onError: @escaping (String) -> Void) -> DisposeBag {
-        let bag = DisposeBag()
-        observationsSubject
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onDisplayObservations)
-            .disposed(by: bag)
-        modelStatusSubject
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onModelStatusChanged)
-            .disposed(by: bag)
-        errorsSubject
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onError)
-            .disposed(by: bag)
-        return bag
+    func observations() -> ObservationStreams {
+        return ObservationStreams(observations: observationsSubject.asObservable(),
+                                  modelStatus: modelStatusSubject.asObservable(),
+                                  errors: errorsSubject.asObservable())
     }
 
     func viewLocationChanged(center: CLLocationCoordinate2D, viewSpan: MKCoordinateSpan) {
