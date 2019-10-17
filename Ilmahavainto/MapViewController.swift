@@ -37,21 +37,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.setNavigationBarHidden(true, animated: false)
-        let subscriptions = DisposeBag()
-        let modelItems = Globals.model().observations()
-        modelItems.observations
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onDisplayObservations)
-            .disposed(by: subscriptions)
-        modelItems.modelStatus
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onModelStatusChanged)
-            .disposed(by: subscriptions)
-        modelItems.errors
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onError)
-            .disposed(by: subscriptions)
-        modelSubscriptions = subscriptions
+        setupObservationSubscriptions()
         locationManager?.startUpdatingLocation()
     }
 
@@ -59,13 +45,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         locationManager?.stopUpdatingLocation()
         modelSubscriptions = nil
         navigationController?.setNavigationBarHidden(false, animated: false)
-    }
-
-    private func setupLocationUpdates() {
-        locationManager = CLLocationManager()
-        locationManager?.delegate = self
-        locationManager?.requestWhenInUseAuthorization()
-        locationManager?.startUpdatingLocation()
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -91,6 +70,44 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         } else {
             return createPinAnnotation(observationAnnotation)
         }
+    }
+
+
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        performSegue(withIdentifier: "ShowObservationStation", sender: view)
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowObservationStation" {
+            if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
+                (segue.destination as? ObservationDataViewController)?.setStationId(annotation.observation.locationId)
+            }
+        }
+    }
+
+    private func setupLocationUpdates() {
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
+        locationManager?.requestWhenInUseAuthorization()
+        locationManager?.startUpdatingLocation()
+    }
+
+    private func setupObservationSubscriptions() {
+        let subscriptions = DisposeBag()
+        let modelItems = Globals.model().observations()
+        modelItems.observations
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onDisplayObservations)
+            .disposed(by: subscriptions)
+        modelItems.modelStatus
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onModelStatusChanged)
+            .disposed(by: subscriptions)
+        modelItems.errors
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onError)
+            .disposed(by: subscriptions)
+        modelSubscriptions = subscriptions
     }
 
     private func createWindBarbAnnotation(_ observationAnnotation: ObservationAnnotation,
@@ -145,18 +162,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         return UIImage(named: barbImage(windSpeed: windSpeed))?.rotate(degrees: windDirection - 90.0)  // The barb images point to east
     }
 
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        performSegue(withIdentifier: "ShowObservationStation", sender: view)
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowObservationStation" {
-            if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
-                (segue.destination as? ObservationDataViewController)?.setStationId(annotation.observation.locationId)
-            }
-        }
-    }
-
     private func onError(_ message: String) {
         showAlert(message)
     }
@@ -207,7 +212,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
     }
     
-    func makeObservationText(_ observation: ObservationModel.Observation) -> String {
+    private func makeObservationText(_ observation: ObservationModel.Observation) -> String {
         let airTemperature = observationValue(observation.airTemperature, unit: "°C ")
         let avgWindSpeed = observationValue(observation.windSpeed, unit: " m/s ")
         let gws = observationValue(observation.windSpeedGust, unit: " m/s")
@@ -218,12 +223,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         return result != "" ? result : "(No temperature & wind data)"
     }
     
-    func observationValue(_ value: Double?, unit: String = "") -> String {
+    private func observationValue(_ value: Double?, unit: String = "") -> String {
         guard let v = value else { return "" }
         return String(format: "%0.1f%@", v, unit)
     }
     
-    func showAlert(_ message: String) {
+    private func showAlert(_ message: String) {
         DispatchQueue.main.async {
             let alertVC = UIAlertController(title: "Error loading data",
                                             message: message,
@@ -232,8 +237,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             self.present(alertVC, animated: true, completion: nil)
         }
     }
-
-    let minWindSpeed = 0.01
 }
 
 // http://danlec.com/st4k#questions/27092354
