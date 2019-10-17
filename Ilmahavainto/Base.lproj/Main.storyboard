@@ -111,6 +111,16 @@
                                     <action selector="handleLocateButtonPress:" destination="f1E-O6-rYE" eventType="primaryActionTriggered" id="Nj4-5Y-mny"/>
                                 </connections>
                             </button>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="wnf-Le-72y">
+                                <rect key="frame" x="188.66666666666666" y="429.66666666666669" width="37" height="37"/>
+                            </activityIndicatorView>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Weather observations are available within the country of Finland only. " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nzx-Q5-BRC">
+                                <rect key="frame" x="20" y="486.66666666666669" width="374" height="58.666666666666686"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.051717679794520549" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
@@ -119,17 +129,24 @@
                             <constraint firstItem="K9i-By-udP" firstAttribute="trailing" secondItem="LVM-tH-W4B" secondAttribute="trailingMargin" id="8Hj-mp-UZo"/>
                             <constraint firstAttribute="bottom" secondItem="3A2-Gl-I2t" secondAttribute="bottom" id="Fbl-rd-xIR"/>
                             <constraint firstItem="3A2-Gl-I2t" firstAttribute="top" secondItem="LVM-tH-W4B" secondAttribute="top" id="GeR-jS-NTm"/>
+                            <constraint firstItem="nzx-Q5-BRC" firstAttribute="leading" secondItem="LVM-tH-W4B" secondAttribute="leadingMargin" id="HRz-ix-m6w"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="nzx-Q5-BRC" secondAttribute="trailing" id="Qsj-Ux-HXk"/>
                             <constraint firstItem="3A2-Gl-I2t" firstAttribute="leading" secondItem="LVM-tH-W4B" secondAttribute="leading" id="YNp-TX-4Lj"/>
                             <constraint firstAttribute="trailing" secondItem="3A2-Gl-I2t" secondAttribute="trailing" id="daU-IM-gsC"/>
                             <constraint firstItem="8ts-NC-KnR" firstAttribute="top" secondItem="cH5-mA-jLM" secondAttribute="bottom" id="g3E-v0-zul"/>
+                            <constraint firstItem="nzx-Q5-BRC" firstAttribute="top" secondItem="wnf-Le-72y" secondAttribute="bottom" constant="20" id="nfw-mO-TC1"/>
+                            <constraint firstItem="wnf-Le-72y" firstAttribute="centerY" secondItem="LVM-tH-W4B" secondAttribute="centerY" id="pc6-YQ-Hpv"/>
+                            <constraint firstItem="wnf-Le-72y" firstAttribute="centerX" secondItem="LVM-tH-W4B" secondAttribute="centerX" id="z01-aq-i8x"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="eT0-21-g4e"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="loadingIndicator" destination="wnf-Le-72y" id="6dH-dy-msp"/>
                         <outlet property="locateButton" destination="K9i-By-udP" id="1BB-pM-aRa"/>
                         <outlet property="mapView" destination="3A2-Gl-I2t" id="YlH-EZ-QjD"/>
+                        <outlet property="outsideBoundsLabel" destination="nzx-Q5-BRC" id="6WT-S3-qWQ"/>
                         <segue destination="LoR-WX-q4P" kind="show" identifier="ShowObservationStation" id="ciD-3f-5sf"/>
                     </connections>
                 </viewController>

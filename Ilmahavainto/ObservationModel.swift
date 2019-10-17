@@ -58,10 +58,18 @@ class ObservationModel {
         }
     }
 
+    enum ModelStatus {
+        case Ready
+        case Querying
+        case RegionNotAvailable
+    }
+
     private let boundariesSubject: PublishSubject<CoordinateBoundaries>
     private let pausedSubject: BehaviorSubject<Bool>
     private let observationsSubject: BehaviorSubject<[String: [Observation]]>
     private let errorsSubject: PublishSubject<String>
+    private let modelStatusSubject: BehaviorSubject<ModelStatus>
+    private let querying: BehaviorSubject<Bool>
     private let disposeBag: DisposeBag
 
     private let backgroundScheduler = ConcurrentDispatchQueueScheduler.init(qos: .background)
@@ -70,6 +78,8 @@ class ObservationModel {
         boundariesSubject = PublishSubject()
         pausedSubject = BehaviorSubject(value: true)
         observationsSubject = BehaviorSubject(value: [:])
+        modelStatusSubject = BehaviorSubject(value: ModelStatus.Ready)
+        querying = BehaviorSubject(value: false)
         errorsSubject = PublishSubject()
 
         disposeBag = DisposeBag()
@@ -86,6 +96,22 @@ class ObservationModel {
             .map { (boundaries, _) in boundaries }
             .subscribe(onNext: self.onBoundariesUpdate)
             .disposed(by: disposeBag)
+
+        Observable
+            .combineLatest(querying, boundariesSubject) { (isQuerying, boundaries) -> ModelStatus in
+                if (isQuerying) {
+                    return ModelStatus.Querying
+                } else {
+                    if (boundaries.isEntirelyOutside(ObservationModel.supportedQueryRegion)) {
+                        return ModelStatus.RegionNotAvailable
+                    } else {
+                        return ModelStatus.Ready
+                    }
+                }
+        }
+        .distinctUntilChanged()
+        .subscribe(onNext: self.modelStatusSubject.onNext)
+        .disposed(by: disposeBag)
     }
 
     func pause() {
@@ -97,11 +123,16 @@ class ObservationModel {
     }
 
     func subscribeToObservations(onDisplayObservations: @escaping ([String: [Observation]]) -> Void,
+                                 onModelStatusChanged: @escaping (ModelStatus) -> Void,
                                  onError: @escaping (String) -> Void) -> DisposeBag {
         let bag = DisposeBag()
         observationsSubject
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: onDisplayObservations)
+            .disposed(by: bag)
+        modelStatusSubject
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onModelStatusChanged)
             .disposed(by: bag)
         errorsSubject
             .observeOn(MainScheduler.instance)
@@ -125,6 +156,7 @@ class ObservationModel {
             let url = boundaries.restrictTo(ObservationModel.supportedQueryRegion).queryURL()!
             Swift.print("=> Loading observations after map region change from URL \(url)")
             let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+                self.querying.onNext(false)
                 if let localizedDescription = error?.localizedDescription {
                     self.errorsSubject.onNext(localizedDescription)
                 }
@@ -163,6 +195,7 @@ class ObservationModel {
                     }
                 }
             }
+            self.querying.onNext(true)
             task.resume()
         }
     }

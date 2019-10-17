@@ -14,6 +14,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var locateButton: UIButton!
+    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var outsideBoundsLabel: UILabel!
 
     @IBAction func handleLocateButtonPress(_ sender: Any) {
         guard let mv = mapView else { return }
@@ -43,7 +45,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.setNavigationBarHidden(true, animated: false)
         modelSubscriptions = model.subscribeToObservations(onDisplayObservations: onDisplayObservations,
-                                             onError: onError)
+                                                           onModelStatusChanged: onModelStatusChanged,
+                                                           onError: onError)
         locationManager?.startUpdatingLocation()
     }
 
@@ -184,6 +187,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let toAdd = newAnnotations.filter { (ann) in !annotationModifications.idsToRetain.contains(ann.observation.locationId) }
         mapView.removeAnnotations(annotationModifications.toRemove)
         mapView.addAnnotations(toAdd)
+    }
+
+    private func onModelStatusChanged(_ status: ObservationModel.ModelStatus) {
+        switch (status) {
+        case .Ready:
+            loadingIndicator?.stopAnimating()
+            outsideBoundsLabel?.isHidden = true
+        case .Querying:
+            loadingIndicator?.startAnimating()
+        case .RegionNotAvailable:
+            loadingIndicator?.stopAnimating()
+            outsideBoundsLabel?.isHidden = false
+        }
     }
     
     func makeObservationText(_ observation: ObservationModel.Observation) -> String {
