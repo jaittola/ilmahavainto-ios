@@ -10,22 +10,17 @@ import UIKit
 import MapKit
 import RxSwift
 
-class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, TimestampSelectorDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var locateButton: UIButton!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var outsideBoundsLabel: UILabel!
-    @IBOutlet weak var timestampLabel: UILabel!
-    @IBOutlet weak var timeSelector: UIStepper!
+    @IBOutlet weak var timeSelector: TimestampSelector!
 
     @IBAction func handleLocateButtonPress(_ sender: Any) {
         guard let mv = mapView else { return }
         mv.setCenter(mv.userLocation.coordinate, animated: true)
-    }
-
-    @IBAction func onObservationTimeSelected(_ sender: Any) {
-        setSelectedTimestampFromIndex(Int(timeSelector.value))
     }
 
     private let defaultCenter = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
@@ -41,11 +36,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         super.viewDidLoad()
         boundsSubject = BehaviorSubject(value: ObservationModel.CoordinateBoundaries(center: defaultCenter, viewSpan: defaultCoordinateSpan))
         mapView.delegate = self
-        timestampLabel.text = ""
-        timeSelector.maximumValue = 0
         mapView.setRegion(MKCoordinateRegion(center: defaultCenter, span: defaultCoordinateSpan),
                           animated: false)
         setupLocationUpdates()
+        timeSelector.delegate = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -98,6 +92,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 destination.setObservationDetails(stationId: annotation.observation.locationId, timestamp: timestamp)
             }
         }
+    }
+
+    func onObservationTimeSelected(_ value: Double) {
+        setSelectedTimestampFromIndex(Int(value))
     }
 
     private func setupLocationUpdates() {
@@ -162,7 +160,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return ""
                 } }
             .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { self.timestampLabel.text = $0 } )
+            .subscribe(onNext: { self.timeSelector.text = $0 } )
             .disposed(by: subscriptions)
         boundsSubject?.subscribe(onNext: { Globals.model().viewLocationChanged($0) })
             .disposed(by: subscriptions)
