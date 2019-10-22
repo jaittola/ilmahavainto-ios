@@ -11,33 +11,35 @@ import RxSwift
 
 class ObservationDataViewController: UITableViewController {
 
-    func setStationId(_ stationId: String) {
+    func setObservationDetails(stationId: String, timestamp: Date) {
         self.stationId.onNext(stationId)
+        self.timestamp.onNext(timestamp)
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        subscription = self.stationId
+        let observations = self.stationId
             .flatMapLatest { (stationId) in stationId.isEmpty ? Observable.just([]) : Globals.model().observation(forLocationId: stationId) }
+        subscription = Observable.combineLatest(observations, timestamp) { (obs, time) in obs.filter { $0.time == time }.first }
             .observeOn(MainScheduler.instance)
-            .subscribe(onNext: updateObservations)
+            .subscribe(onNext: updateObservation)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         subscription?.dispose()
     }
 
-    private func updateObservations(_ observations: [ObservationModel.Observation]) {
+    private func updateObservation(observation: ObservationModel.Observation?) {
         displayArray.removeAll(keepingCapacity: true)
-        if let observation = observations.last {
+        if let obs = observation {
             for m in observationMappings {
-                if let value = m.formatter(observation) {
+                if let value = m.formatter(obs) {
                     displayArray.append((m.title, value))
                 }
             }
-            stationName = observation.stationName
-            coordString = ObservationUtils.makeCoordinateString(lat: observation.coordinates.latitude,
-                                                                lon: observation.coordinates.longitude)
-            observationTimestamp = observationTimestamp(observation.time)
+            stationName = obs.stationName
+            coordString = ObservationUtils.makeCoordinateString(lat: obs.coordinates.latitude,
+                                                                lon: obs.coordinates.longitude)
+            observationTimestamp = observationTimestamp(obs.time)
         }
         DispatchQueue.main.async {
             self.tableView.reloadData()
@@ -76,6 +78,7 @@ class ObservationDataViewController: UITableViewController {
     }
 
     private var stationId = BehaviorSubject(value: "")
+    private var timestamp = BehaviorSubject(value: Date.distantPast)
     private var stationName = ""
     private var coordString = ""
     private var observationTimestamp = ""

@@ -3,7 +3,7 @@
 //  Ilmahavainto
 //
 //  Created by Jukka Aittola on 03/08/15.
-//  Copyright (c) 2015 Jukka Aittola. All rights reserved.
+//  Copyright (c) 2015-2019 Jukka Aittola. All rights reserved.
 //
 
 import UIKit
@@ -17,10 +17,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var outsideBoundsLabel: UILabel!
     @IBOutlet weak var timestampLabel: UILabel!
+    @IBOutlet weak var timeSelector: UIStepper!
 
     @IBAction func handleLocateButtonPress(_ sender: Any) {
         guard let mv = mapView else { return }
         mv.setCenter(mv.userLocation.coordinate, animated: true)
+    }
+
+    @IBAction func onObservationTimeSelected(_ sender: Any) {
+        setSelectedTimestampFromIndex(Int(timeSelector.value))
     }
 
     private let defaultCenter = CLLocationCoordinate2D(latitude: 60.2, longitude: 25.0)
@@ -29,12 +34,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     private var locationManager: CLLocationManager? = nil
     private var modelSubscriptions: DisposeBag? = nil
     private var boundsSubject: BehaviorSubject<ObservationModel.CoordinateBoundaries>? = nil
+    private var selectedObservationTimestamp = BehaviorSubject<Date>(value: Date.distantPast)
+    private var observationTimestampsSubject = BehaviorSubject<[Date]>(value: [])
 
     override func viewDidLoad() {
         super.viewDidLoad()
         boundsSubject = BehaviorSubject(value: ObservationModel.CoordinateBoundaries(center: defaultCenter, viewSpan: defaultCoordinateSpan))
         mapView.delegate = self
         timestampLabel.text = ""
+        timeSelector.maximumValue = 0
         mapView.setRegion(MKCoordinateRegion(center: defaultCenter, span: defaultCoordinateSpan),
                           animated: false)
         setupLocationUpdates()
@@ -84,8 +92,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowObservationStation" {
-            if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation {
-                (segue.destination as? ObservationDataViewController)?.setStationId(annotation.observation.locationId)
+            if let annotation = (sender as? MKAnnotationView)?.annotation as? ObservationAnnotation,
+                let destination = segue.destination as? ObservationDataViewController,
+                let timestamp = try? selectedObservationTimestamp.value() {
+                destination.setObservationDetails(stationId: annotation.observation.locationId, timestamp: timestamp)
             }
         }
     }
@@ -100,17 +110,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     private func subscribeToObservations() -> DisposeBag {
         let subscriptions = DisposeBag()
         let modelItems = Globals.model().observations()
-        let observationsInView = modelItems.observations
-            .withLatestFrom(boundsSubject!) { (observations, bounds) in
-                observations.mapValues { obsArray in obsArray.filter { bounds.contains($0.coordinates) } } }
-        let observationTimestamps = observationsInView
-            .map { [[ObservationModel.Observation]]($0.values).flatMap { $0 } }
-            .map { observationArr in Array(Set(observationArr.map { $0.time })).sorted() }
-
-        observationsInView
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: onDisplayObservations)
-            .disposed(by: subscriptions)
         modelItems.modelStatus
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: onModelStatusChanged)
@@ -119,10 +118,42 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: onError)
             .disposed(by: subscriptions)
-        observationTimestamps
-            .map { timestamps -> String in
-                if let ts = timestamps.last {
-                    let date = DateFormatter.localizedString(from: ts,
+        let observationsInView = modelItems.observations
+            .withLatestFrom(boundsSubject!) { (observations, bounds) in
+                observations
+                    .filter { (key, obsArray) in
+                        if let coordinates = obsArray.first?.coordinates {
+                            return bounds.contains(coordinates)
+                        } else {
+                            return false
+                        } } }
+        observationsInView
+            .map { [[ObservationModel.Observation]]($0.values).flatMap { $0 } }
+            .map { observationArr in Array(Set(observationArr.map { $0.time })).sorted() }
+            .withLatestFrom(selectedObservationTimestamp) { timestamps, selectedTimestamp in (timestamps, selectedTimestamp) }
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: { (timestamps, selectedTimestamp) in
+                let c = max(timestamps.count - 1, 0)
+                self.timeSelector.maximumValue = Double(c)
+                self.observationTimestampsSubject.onNext(timestamps)
+                if let idx = timestamps.firstIndex(of: selectedTimestamp) {
+                    self.timeSelector.value = Double(idx)
+                    self.setSelectedTimestampFromIndex(idx)
+                } else {
+                    self.timeSelector.value = Double(c)
+                    self.setSelectedTimestampFromIndex(c)
+                } })
+            .disposed(by: subscriptions)
+        Observable.combineLatest(observationsInView, selectedObservationTimestamp) { (observationsDict, timestamp) in
+            observationsDict.values
+                .flatMap { observations in observations.filter { $0.time == timestamp } } }
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: onDisplayObservations)
+            .disposed(by: subscriptions)
+        selectedObservationTimestamp
+            .map { timestamp in
+                if (timestamp != Date.distantPast) {
+                    let date = DateFormatter.localizedString(from: timestamp,
                                                              dateStyle: DateFormatter.Style.short,
                                                              timeStyle: DateFormatter.Style.short)
                     let obsTitle = NSLocalizedString("Observations at", comment: "")
@@ -131,11 +162,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return ""
                 } }
             .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { self.timestampLabel.text = $0 })
+            .subscribe(onNext: { self.timestampLabel.text = $0 } )
             .disposed(by: subscriptions)
         boundsSubject?.subscribe(onNext: { Globals.model().viewLocationChanged($0) })
             .disposed(by: subscriptions)
         return subscriptions
+    }
+
+    private func setSelectedTimestampFromIndex(_ index: Int) {
+        _ = observationTimestampsSubject
+            .take(1)
+            .map { dates in
+                (!dates.isEmpty && (0..<dates.count).contains(index)) ?
+                    dates[index] : Date.distantPast }
+            .subscribe(onNext: selectedObservationTimestamp.onNext)
     }
 
     private func createWindBarbAnnotation(_ observationAnnotation: ObservationAnnotation,
@@ -194,10 +234,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         showAlert(message)
     }
 
-    private func onDisplayObservations(_ observations: [String: [ObservationModel.Observation]]) {
+    private func onDisplayObservations(_ observations: [ObservationModel.Observation]) {
         let newAnnotations = observations
-            .map { (locationKey, observationArr) -> ObservationAnnotation? in
-                guard let observation = observationArr.last else { return nil }
+            .map { observation in
                 return ObservationAnnotation(title: makeObservationText(observation),
                                              subtitle: observation.stationName,
                                              observation: observation) }
@@ -211,11 +250,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             var idsToRetain: [String] = []
         }
 
-        let currentAnnotations: [ObservationAnnotation] = mapView.annotations.map { (annotation) -> ObservationAnnotation? in annotation as? ObservationAnnotation }.compactMap { $0 }
+        let currentAnnotations: [ObservationAnnotation] = mapView.annotations.map { annotation -> ObservationAnnotation? in annotation as? ObservationAnnotation }.compactMap { $0 }
         let annotationModifications = currentAnnotations.reduce(into: AnnotationModifications()) { (modifications: inout AnnotationModifications, annotation: ObservationAnnotation) in
             let isOutsideBounds = !mapView.visibleMapRect.contains(MKMapPoint(annotation.coordinate))
-            let isOutdated = annotation.observation.time < (newAnnotationsMap[annotation.observation.locationId]?.observation.time ?? annotation.observation.time)
-            if (isOutsideBounds || isOutdated) {
+            let isOfDifferentTime = annotation.observation.time != (newAnnotationsMap[annotation.observation.locationId]?.observation.time ?? annotation.observation.time)
+            if (isOutsideBounds || isOfDifferentTime) {
                 modifications.toRemove.append(annotation)
             } else {
                 modifications.idsToRetain.append(annotation.observation.locationId)

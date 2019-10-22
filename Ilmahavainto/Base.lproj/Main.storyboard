@@ -130,8 +130,11 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <stepper hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="1SC-6q-v3t">
+                                    <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="1SC-6q-v3t">
                                         <rect key="frame" x="312" y="9" width="94" height="32"/>
+                                        <connections>
+                                            <action selector="onObservationTimeSelected:" destination="f1E-O6-rYE" eventType="valueChanged" id="x3r-gf-pIU"/>
+                                        </connections>
                                     </stepper>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
@@ -172,6 +175,7 @@
                         <outlet property="locateButton" destination="K9i-By-udP" id="1BB-pM-aRa"/>
                         <outlet property="mapView" destination="3A2-Gl-I2t" id="YlH-EZ-QjD"/>
                         <outlet property="outsideBoundsLabel" destination="nzx-Q5-BRC" id="6WT-S3-qWQ"/>
+                        <outlet property="timeSelector" destination="1SC-6q-v3t" id="CXT-50-FZT"/>
                         <outlet property="timestampLabel" destination="ZuK-hr-3s4" id="VNj-gZ-L0C"/>
                         <segue destination="LoR-WX-q4P" kind="show" identifier="ShowObservationStation" id="ciD-3f-5sf"/>
                     </connections>
